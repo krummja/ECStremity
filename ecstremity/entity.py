@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Dict, Optional, TYPE_CHECKING, Union
+from typing import Any, Dict, Optional, TYPE_CHECKING, Union, List
 
 from ecstremity.component import Component
 
@@ -54,9 +54,10 @@ class Entity:
             return True
 
         if not component._key:
-            if not self.components[component.name]:
-                self.components[component.name] = []
-            self.components[component.name].push(component)
+            try:
+                self.components[component.name].append(component)
+            except KeyError:
+                self.components[component.name] = [component]
             component._on_attached(self)
             return True
 
@@ -80,41 +81,59 @@ class Entity:
         the Component, access a particular one by supplying a `key` parameter,
         or leave it unfilled to return all of the specified Component.
         """
-        if isinstance(component, Component):
-            components = self.components[component.name]
-        else:
-            components = self.components[component]
-
-        if components and key:
-            return components[key]
-
-        return components
-
-    def has(self, component: Union[str, Component], key: Optional[str] = None):
-        """Check if a Component is currently attached to this Entity."""
-
         try:
             if type(component) == str:
                 components = self.components[component.upper()]
             else:
                 components = self.components[component.name]
 
-            # if components and key:
-            #     if components[key]:
-            #         return True
+            if components and key:
+                return components[key]
+
+            return components
+
+        except:
+            KeyError(f"Entity has no component {component}!")
+
+    def has(self, component: Union[str, Component], key: Optional[str] = None):
+        """Check if a Component is currently attached to this Entity."""
+        try:
+            if type(component) == str:
+                components = self.components[component.upper()]
+            else:
+                components = self.components[component.name]
+
+            if components and key:
+                if components[key]:
+                    return True
+
             if components:
                 return True
 
         except KeyError:
             return False
 
-
     def owns(self, component: Component) -> bool:
         """Check if target Component has this Entity as an owner."""
         return component.entity == self
 
-    def remove(self, component_type: str) -> Optional[Component]:
-        pass
+    def remove(
+            self,
+            component: Union[str, Component],
+            key: Optional[str] = None
+        ) -> Optional[Component]:
+        is_component = isinstance(component, Component)
+        key = component.key if is_component else key
+
+        definition = self.ecs.components.get(component)
+        accessor = definition.name
+
+        if definition.allow_multiple:
+            if not definition.key:
+                try:
+                    all = self.components[accessor]
+                except:
+                    raise KeyError(f"Cannot remove {definition.name} not on this entity!")
 
     def serialize(self):
         pass
