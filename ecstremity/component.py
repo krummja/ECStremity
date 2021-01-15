@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from entity import Entity
@@ -10,10 +10,15 @@ class Component:
     """All Components inherit from this class."""
     name: str
     ecs: Engine
-    entity: Entity
+    entity: Optional[Entity] = None
+    _key: Optional[str] = None
 
     allow_multiple: bool = False
     _is_destroyed: bool = False
+
+    @property
+    def key(self) -> str:
+        return self._key
 
     @property
     def is_destroyed(self) -> bool:
