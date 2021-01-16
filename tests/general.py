@@ -16,16 +16,13 @@ class Position(Component):
 def main():
     ecs = Engine()
     ecs.register_component(Position)
-    ecs.create_component("POSITION", {'x': 10, 'y': 10})
-
     monster = ecs.create_entity()
     monster.add("Position", {'x': 10, 'y': 5})
-    monster.add("Position", {'x': 5, 'y': 10})
-    print(monster.has("Position"))  # returns True
-    print(monster.get("Position"))  # returns Position instance on monster
+    print(monster.items())
 
-    position = monster.get("Position")
-    print(monster.owns(position))  # True
+    component = monster.remove('Position')
+    print(vars(component))
+
 
 if __name__ == '__main__':
     main()

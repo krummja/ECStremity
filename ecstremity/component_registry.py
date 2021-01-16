@@ -7,10 +7,9 @@ from ecstremity.component import Component
 
 class ComponentRegistry(Registry):
     """Component registry."""
-    _definitions: Dict[str, Component] = {}
 
     def register(self, component: Component):
-        self._definitions[component.name] = component
+        self[component.name] = component
 
     def create(
             self,
@@ -26,17 +25,14 @@ class ComponentRegistry(Registry):
         if type(component) != str:
             if issubclass(component, Component):
                 component = component.name
-        definition = self._definitions[component.upper()]
+        definition = self[component.upper()]
         return definition(**properties)
 
-    def get(self, component: Union[str, Component]) -> Component:
-        """Grab a Component definition from those registered."""
-        try:
-            if type(component) != str:
-                component = component.name
-            return self._definitions[component.upper()]
-        except:
-            raise KeyError(f"No component {component} registered!")
-
-    def get_type(self, component):
-        pass
+    # def get(self, component: Union[str, Component]) -> Component:
+    #     """Grab a Component definition from those registered."""
+    #     try:
+    #         if type(component) != str:
+    #             component = component.name
+    #         return self[component.upper()]
+    #     except:
+    #         raise KeyError(f"No component {component} registered!")

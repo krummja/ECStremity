@@ -6,11 +6,10 @@ from ecstremity.entity import Entity
 
 
 class EntityRegistry(Registry):
-    _entities: Dict[str, Entity] = {}
 
     @property
     def all(self) -> ValuesView[Entity]:
-        return self._entities.values()
+        return self.values()
 
     def create(self, uid: Optional[str] = None) -> Entity:
         """Create a new Entity and register it with the EntityRegistry."""
@@ -31,19 +30,20 @@ class EntityRegistry(Registry):
         """Trigger an entity to self-destruct (including all attached
         Components).
         """
-        self._entities[uid].destroy()
+        self[uid].destroy()
 
     def get(self, uid: str) -> Entity:
         """Search for an entity by UID."""
-        return self._entities[uid]
+        return self[uid]
 
     def on_entity_destroyed(self, entity: Entity) -> None:
         """Callback for entity self-destruct."""
-        del self._entities[entity.uid]
+        print(f"Destroying {entity}")
+        del self[entity.uid]
 
     def register(self, entity: Entity) -> Entity:
         """Register an Entity with the EntityRegistry."""
-        self._entities[entity.uid] = entity
+        self[entity.uid] = entity
         return entity
 
     def cleanup_refs(self):

@@ -11,14 +11,11 @@ class Component:
     name: str
     ecs: Engine
     entity: Optional[Entity] = None
-    _key: Optional[str] = None
-
-    allow_multiple: bool = False
     _is_destroyed: bool = False
 
     @property
-    def key(self) -> str:
-        return self._key
+    def accessor(self) -> str:
+        return self.name.upper()
 
     @property
     def is_destroyed(self) -> bool:
@@ -28,9 +25,11 @@ class Component:
     def is_attached(self) -> bool:
         return bool(self.entity)
 
-    def remove(self, destroy: bool = True) -> None:
-        if self._is_attached:
-            pass
+    def remove(self, destroy: bool = True) -> Optional[Component]:
+        if self.is_attached:
+            self.entity[self.accessor] = None
+            self.entity = None
+            return self
         if destroy:
             self._on_destroyed()
 
