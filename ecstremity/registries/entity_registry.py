@@ -43,10 +43,13 @@ class EntityRegistry(Registry):
         return entity
 
     def serialize(self, entities):
+        """TODO"""
         pass
 
     def deserialize(self, data):
+        """TODO"""
         pass
 
     def deserialize_entity(self, data):
+        """TODO"""
         pass

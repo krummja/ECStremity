@@ -1,6 +1,6 @@
 component_registry
 ==================
 
-.. autoclass:: ecstremity.component_registry.ComponentRegistry
+.. autoclass:: ecstremity.registries.component_registry.ComponentRegistry
     :members:
     :show-inheritance:

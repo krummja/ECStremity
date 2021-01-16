@@ -12,12 +12,6 @@ class Component:
     To create a new Component, inherit from this base class and define the
     Component's properties as instance variables in the subclass's constructor.
 
-        class Position(Component):
-            name = "POSITION"
-            def __init__(self, x: int, y: int) -> None:
-                self.x = x
-                self.y = y
-
     Note that the `name` attribute is the accessor for the component, whether
     as an instance or uninitialized class. These should be in all-caps for
     consistency.

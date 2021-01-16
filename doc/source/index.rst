@@ -11,8 +11,10 @@ ECStremity - A Python EC(S) Library
    :caption: Contents:
 
    component_registry
+   component
    engine
    entity_registry
+   entity
 
 Usage and Examples
 ==================

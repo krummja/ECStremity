@@ -17,9 +17,9 @@ class Entity(defaultdict):
     using either the class symbol for the component or the component's string
     accessor name. The following are all valid:
 
-        position = Entity[Position]
-        position = Entity["Position"]
-        position = Entity["POSITION"]
+        position = Entity[Position]\n
+        position = Entity["Position"]\n
+        position = Entity["POSITION"]\n
         position = Entity["pOsITiOn"]
     """
 

@@ -1,9 +1,6 @@
 entity_registry
 ===============
 
-.. automodule:: ecstremity.entity_registry
-   :members:
-
-.. autoclass:: ecstremity.entity_registry.EntityRegistry
+.. autoclass:: ecstremity.registries.entity_registry.EntityRegistry
     :members:
     :show-inheritance:

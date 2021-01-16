@@ -23,6 +23,9 @@ class Engine:
         return self.entities.get(uid)
 
     def create_component(self, component, properties) -> Component:
+        """Initialize a new component from those registered using the
+        specified properties.
+        """
         return self.components.create(component, properties)
 
     def create_entity(self, uid: Optional[str] = None) -> Entity:
@@ -32,22 +35,28 @@ class Engine:
         return self.entities.create(uid)
 
     def create_prefab(self, name_or_class, initial_props=None):
+        """TODO"""
         pass
 
     def create_query(self, filters):
+        """TODO"""
         pass
 
     def destroy_entity(self, uid: str) -> None:
         self.entities.destroy(uid)
 
     def register_component(self, component: Component) -> None:
+        """Register a component class to the ComponentRegistry."""
         self.components.register(component)
 
     def register_prefab(self, prefab):
+        """TODO"""
         pass
 
     def serialize(self, entities):
+        """TODO"""
         pass
 
     def deserialize(self, data):
+        """TODO"""
         pass
