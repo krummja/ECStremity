@@ -1,8 +1,8 @@
 from __future__ import annotations
 from typing import Dict, Optional, ValuesView
 
-from ecstremity.registry import Registry
 from ecstremity.entity import Entity
+from .registry import Registry
 
 
 class EntityRegistry(Registry):

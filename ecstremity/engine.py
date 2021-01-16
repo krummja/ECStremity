@@ -2,12 +2,10 @@ from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 from uuid import uuid1
 
-from ecstremity.component_registry import ComponentRegistry
-from ecstremity.entity_registry import EntityRegistry
+from ecstremity.registries import ComponentRegistry, EntityRegistry
 
 if TYPE_CHECKING:
-    from component import Component
-    from entity import Entity
+    from ecstremity import Component, Entity
 
 
 class Engine:

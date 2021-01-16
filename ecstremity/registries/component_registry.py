@@ -1,8 +1,8 @@
 from __future__ import annotations
 from typing import Any, Dict, TYPE_CHECKING, Optional, Union
 
-from ecstremity.registry import Registry
-from ecstremity.component import Component
+from ecstremity import Component
+from .registry import Registry
 
 
 class ComponentRegistry(Registry):

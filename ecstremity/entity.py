@@ -3,10 +3,10 @@ from typing import Any, Dict, Optional, TYPE_CHECKING, Union, List
 
 from collections import  defaultdict
 
-from ecstremity.component import Component
+from ecstremity import Component
 
 if TYPE_CHECKING:
-    from engine import Engine
+    from ecstremity import Engine
 
 
 class Entity(defaultdict):

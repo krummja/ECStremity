@@ -1,9 +1,6 @@
 from __future__ import annotations
 
-from ecstremity.engine import Engine
-from ecstremity.component import Component
-from ecstremity.entity import Entity
-
+from ecstremity import Engine, Component
 
 class Position(Component):
     name = "POSITION"
