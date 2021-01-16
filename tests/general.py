@@ -18,11 +18,12 @@ def main():
     ecs.register_component(Position)
     monster = ecs.create_entity()
     monster.add("Position", {'x': 10, 'y': 5})
-    print(monster.items())
 
-    component = monster.remove('Position')
-    print(vars(component))
+    position = monster['Position']
+    print(monster.owns(position))
 
+    position = monster.remove('Position')
+    print(monster.owns(position))
 
 if __name__ == '__main__':
     main()

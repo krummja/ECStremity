@@ -26,7 +26,7 @@ class Entity(defaultdict):
 
     def add(self, component: Union[str, Component], properties: Dict[str, Any]) -> bool:
         if isinstance(component, str):
-            component = self.ecs.components[component.upper()]
+            component = self.ecs.components[component]
         component = self.ecs.create_component(component, properties)
         return self._attach(component)
 
@@ -41,20 +41,11 @@ class Entity(defaultdict):
             component.destroy()
         self.ecs.entities.on_entity_destroyed(self)
 
-    def get(self, component: Union[str, Component]):
-        """Get a Component currently attached to this Entity.
-
-        Components can be accessed by passing in either the string name of the
-        Component, or the class symbol directly. If the Entity has multiple of
-        the Component, access a particular one by supplying a `key` parameter,
-        or leave it unfilled to return all of the specified Component.
-        """
-
     def has(self, component: Union[str, Component]):
         """Check if a Component is currently attached to this Entity."""
         try:
             if isinstance(component, str):
-                components = self[component.upper()]
+                components = self[component]
             else:
                 components = self[component.name]
             if components:
@@ -68,12 +59,13 @@ class Entity(defaultdict):
 
     def remove(self, component: Union[str, Component]) -> Optional[Component]:
         if isinstance(component, str):
-            return self[component.upper()].remove()
+            return self[component].remove()
         return self[component].remove()
-
 
     def serialize(self):
         pass
 
-    def fire_event(self, name: str, data):
-        pass
+    def __getitem__(self, component: Union[str, Component]) -> Component:
+        if not isinstance(component, str):
+            component = component.name
+        return super().__getitem__(component.upper())

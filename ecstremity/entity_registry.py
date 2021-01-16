@@ -32,10 +32,6 @@ class EntityRegistry(Registry):
         """
         self[uid].destroy()
 
-    def get(self, uid: str) -> Entity:
-        """Search for an entity by UID."""
-        return self[uid]
-
     def on_entity_destroyed(self, entity: Entity) -> None:
         """Callback for entity self-destruct."""
         print(f"Destroying {entity}")
@@ -45,15 +41,6 @@ class EntityRegistry(Registry):
         """Register an Entity with the EntityRegistry."""
         self[entity.uid] = entity
         return entity
-
-    def cleanup_refs(self):
-        pass
-
-    def add_ref(self):
-        pass
-
-    def remove_ref(self):
-        pass
 
     def serialize(self, entities):
         pass

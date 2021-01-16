@@ -14,10 +14,6 @@ class Component:
     _is_destroyed: bool = False
 
     @property
-    def accessor(self) -> str:
-        return self.name.upper()
-
-    @property
     def is_destroyed(self) -> bool:
         return self._is_destroyed
 
@@ -27,7 +23,7 @@ class Component:
 
     def remove(self, destroy: bool = True) -> Optional[Component]:
         if self.is_attached:
-            self.entity[self.accessor] = None
+            self.entity[self.name.upper()] = None
             self.entity = None
             return self
         if destroy:
@@ -37,12 +33,15 @@ class Component:
         self.remove(destroy=True)
 
     def on_attached(self):
+        """User-overridable callback"""
         pass
 
     def on_detached(self):
+        """User-overridable callback"""
         pass
 
     def on_destroyed(self):
+        """User-overridable callback"""
         pass
 
     def _on_attached(self, entity: Entity):
