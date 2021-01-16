@@ -27,7 +27,7 @@ class Query:
         self._cache = []
 
     @property
-    def cache(self):
+    def result(self):
         return self._cache
 
     def is_match(self, entity: Entity):
@@ -39,7 +39,7 @@ class Query:
         has_all = all([entity.has(c) for c in self.query_filter['all_of']])
 
         if len(self.query_filter['none_of']) >= 1:
-            has_none = not all([entity.has(c) for c in self.query_filter['none_of']])
+            has_none = all([not entity.has(c) for c in self.query_filter['none_of']])
         else:
             has_none = True
         return has_any and has_all and has_none

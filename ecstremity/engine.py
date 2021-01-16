@@ -1,11 +1,12 @@
 from __future__ import annotations
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from uuid import uuid1
 
-from ecstremity.registries import ComponentRegistry, EntityRegistry
+from ecstremity.registries import ComponentRegistry, EntityRegistry, QueryRegistry
 
 if TYPE_CHECKING:
     from ecstremity import Component, Entity
+    from .query import Query
 
 
 class Engine:
@@ -13,6 +14,7 @@ class Engine:
     def __init__(self) -> None:
         self.components = ComponentRegistry(self)
         self.entities = EntityRegistry(self)
+        self.queries = QueryRegistry(self)
 
     def generate_uid(self) -> str:
         """Generate a new unique identifier for an `Entity`."""
@@ -38,9 +40,13 @@ class Engine:
         """TODO"""
         pass
 
-    def create_query(self, filters):
-        """TODO"""
-        pass
+    def create_query(
+            self,
+            any_of: Optional[List[str]] = None,
+            all_of: Optional[List[str]] = None,
+            none_of: Optional[List[str]] = None
+        ) -> Query:
+        return self.queries.create(any_of=any_of, all_of=all_of, none_of=none_of)
 
     def destroy_entity(self, uid: str) -> None:
         self.entities.destroy(uid)

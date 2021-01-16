@@ -1,10 +1,17 @@
 from __future__ import annotations
 
 import unittest
+from unittest.mock import create_autospec
 
 from ecstremity.engine import Engine
 from ecstremity.component import Component
 from ecstremity.entity import  Entity
+
+
+def function(a, b, c):
+    pass
+
+mock_function = create_autospec(function, return_value='Mock Callback!')
 
 
 class Position(Component):
@@ -45,8 +52,120 @@ class TestECS(unittest.TestCase):
     def testAttachComponent(self):
         self.ecs.register_component(Position)
         self.ecs.register_component(Renderable)
-        # monster = self.ecs.create_entity()
-        # monster.add('Position', {'x': 10, 'y': 9})
+        monster = self.ecs.create_entity()
+        monster.add('Position', {'x': 10, 'y': 9})
+
+    def testAnyOfQuery(self):
+        self.ecs.register_component(Position)
+        self.ecs.register_component(Renderable)
+
+        monster = self.ecs.create_entity()
+        monster.add(Position, {'x': 0, 'y': 0})
+        monster.add(Renderable, {'char': '@', 'fg': '#0f0', 'bg': '#000'})
+
+        empty_monster = self.ecs.create_entity()
+
+        # Expect False for an empty Entity
+        query = self.ecs.create_query(any_of=['Renderable'])
+        result = query.candidate(empty_monster)
+        self.assertFalse(result)
+
+        # Expect True if Entity has the Component
+        query = self.ecs.create_query(any_of=['Position'])
+        result = query.candidate(monster)
+        self.assertTrue(result)
+
+        # Expect True if Entity has at least one of listed Components
+        query = self.ecs.create_query(any_of=['Position', 'Geometry', 'Renderable'])
+        true_result = query.candidate(monster)
+        false_result = query.candidate(empty_monster)
+        self.assertTrue(true_result)
+        self.assertFalse(false_result)
+
+    def testAllOfQuery(self):
+        self.ecs.register_component(Position)
+        self.ecs.register_component(Renderable)
+
+        monster = self.ecs.create_entity()
+        monster.add(Position, {'x': 0, 'y': 0})
+        monster.add(Renderable, {'char': '@', 'fg': '#0f0', 'bg': '#000'})
+
+        empty_monster = self.ecs.create_entity()
+
+        query = self.ecs.create_query(all_of=['Position', 'Renderable'])
+
+        # Should return True for an Entity that has all of the listed Components
+        true_result = query.candidate(monster)
+        self.assertTrue(true_result)
+
+        # Should return False for an empty Entity
+        false_result = query.candidate(empty_monster)
+        self.assertFalse(false_result)
+
+        # Should return False for an Entity that has a subset of the listed Components
+        other_monster = self.ecs.create_entity()
+        other_monster.add(Position, {'x': 10, 'y': 2})
+
+        false_result = query.candidate(other_monster)
+        self.assertFalse(false_result)
+
+    def testNoneOfQuery(self):
+        self.ecs.register_component(Position)
+        self.ecs.register_component(Renderable)
+
+        monster = self.ecs.create_entity()
+        monster.add(Position, {'x': 0, 'y': 0})
+        monster.add(Renderable, {'char': '@', 'fg': '#0f0', 'bg': '#000'})
+
+        empty_monster = self.ecs.create_entity()
+
+        query = self.ecs.create_query(none_of=['Position', 'Renderable'])
+
+        # Should return True for an empty Entity
+        true_result = query.candidate(empty_monster)
+        self.assertTrue(true_result)
+
+        # Should return False for an Entity that has any of the listed Components
+        false_result = query.candidate(monster)
+        self.assertFalse(false_result)
+
+    def testCombinationQuery(self):
+        self.ecs.register_component(Position)
+        self.ecs.register_component(Renderable)
+
+        monster = self.ecs.create_entity()
+        monster.add(Position, {'x': 0, 'y': 0})
+        monster.add(Renderable, {'char': '@', 'fg': '#0f0', 'bg': '#000'})
+
+        empty_monster = self.ecs.create_entity()
+
+        query = self.ecs.create_query(
+            all_of=['Position', 'Renderable'],
+            none_of=['Combatant', 'Geometry']
+            )
+
+        true_result = query.candidate(monster)
+        false_result = query.candidate(empty_monster)
+
+        self.assertTrue(true_result)
+        self.assertFalse(false_result)
+
+    def testQueryCallbacks(self):
+        self.ecs.register_component(Renderable)
+        entity = self.ecs.create_entity()
+        query = self.ecs.create_query(any_of=['Renderable'])
+
+        on_added_callback1 = create_autospec(lambda e: e, return_value="Entity added")
+        query.on_entity_added(on_added_callback1)
+        entity.add('Renderable', {'char': '#', 'fg': '#0f0', 'bg': '#000'})
+        query.candidate(entity)
+        on_added_callback1.assert_called_once_with(entity)
+
+        on_removed_callback1 = create_autospec(lambda e: e, return_value="Entity removed")
+        query.on_entity_removed(on_removed_callback1)
+        entity.remove('Renderable')
+        query.candidate(entity)
+        on_removed_callback1.assert_called_once_with(entity)
 
 if __name__ == '__main__':
     unittest.main()
