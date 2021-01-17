@@ -12,7 +12,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name='ecstremity',
-    version='0.0.1',
+    version='1.0.0',
     author='Jonathan Crum',
     author_email="crumja4@gmail.com",
     url="https://github.com/krummja/ECStremity",
