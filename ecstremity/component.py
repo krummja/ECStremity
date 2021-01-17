@@ -17,10 +17,17 @@ class Component:
     consistency.
     """
 
-    name: str
     ecs: Engine
     entity: Optional[Entity] = None
     _is_destroyed: bool = False
+
+    @property
+    def name(self) -> str:
+        return self._name.upper()
+
+    @name.setter
+    def name(self, value: str) -> None:
+        self._name = value.upper()
 
     @property
     def is_destroyed(self) -> bool:

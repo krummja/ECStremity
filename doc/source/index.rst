@@ -15,6 +15,8 @@ ECStremity - A Python EC(S) Library
    engine
    entity_registry
    entity
+   query_registry
+   query
 
 Usage and Examples
 ==================

@@ -25,12 +25,18 @@ class Query:
         self._on_entity_added_cbs = []
         self._on_entity_removed_cbs = []
         self._cache = []
+        self.blast_cache()
 
     @property
     def result(self):
+        """Return the result set of the query."""
         return self._cache
 
     def is_match(self, entity: Entity):
+        """Returns True if the provided entity matches the query.
+
+        Mostly used internally.
+        """
         if len(self.query_filter['any_of']) >= 1:
             has_any = any([entity.has(c) for c in self.query_filter['any_of']])
         else:
@@ -45,9 +51,15 @@ class Query:
         return has_any and has_all and has_none
 
     def on_entity_added(self, cb):
+        """Add a callback for when an entity is created or updated to match
+        the query.
+        """
         self._on_entity_added_cbs.append(cb)
 
     def on_entity_removed(self, cb):
+        """Add a callback for when an entity is removed or updated to no
+        longer match the query.
+        """
         self._on_entity_removed_cbs.append(cb)
 
     def has(self, entity: Entity) -> bool:
@@ -87,8 +99,9 @@ class Query:
             for cb in self._on_entity_removed_cbs:
                 cb(entity)
 
-    def bust_cache(self):
+    def blast_cache(self):
+        """Press CTRL+H, check all the boxes and go! Set me free - blast my cache!"""
         self._cache.clear()
-        for entity in self._ecs.entities.items():
+        for entity in self._ecs.entities.get_all:
             self.candidate(entity)
         return self._cache

@@ -23,18 +23,18 @@ class QueryRegistry(Registry):
         self._queries.append(query)
         return query
 
-    def on_component_added(self, entity: Entity):
+    def on_component_added(self, entity: Entity) -> None:
         for query in self._queries:
             query._on_component_added(entity)
 
-    def on_component_removed(self, entity: Entity):
+    def on_component_removed(self, entity: Entity) -> None:
         for query in self._queries:
             query._on_component_removed(entity)
 
-    def on_entity_created(self, entity: Entity):
+    def on_entity_created(self, entity: Entity) -> None:
         for query in self._queries:
             query._on_entity_created(entity)
 
-    def on_entity_destroyed(self, entity: Entity):
+    def on_entity_destroyed(self, entity: Entity) -> None:
         for query in self._queries:
             query._on_entity_destroyed(entity)

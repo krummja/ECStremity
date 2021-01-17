@@ -8,7 +8,7 @@ from .registry import Registry
 class EntityRegistry(Registry):
 
     @property
-    def all(self) -> ValuesView[Entity]:
+    def get_all(self) -> ValuesView[Entity]:
         return self.values()
 
     def create(self, uid: Optional[str] = None) -> Entity:
