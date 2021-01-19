@@ -65,7 +65,7 @@ kinematics = ecs.create_query(
     )
 ```
 
-Loop over the result set to update the position for all entities in the query. The query will always reutrn an up-to-date list containing entities that match.
+Loop over the result set to update the position for all entities in the query. The query will always return an up-to-date list containing entities that match.
 
 ```python
 def loop(dt):
