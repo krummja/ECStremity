@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from entity import Entity
+    from entity import Entity, EntityEvent
     from engine import Engine
 
 
@@ -52,7 +52,7 @@ class Component:
         """
         pass
 
-    def on_event(self):
+    def on_event(self, evt):
         """Override this method to add behavior when this component receives
         a signal from an `EntityEvent`.
         """
@@ -85,9 +85,13 @@ class Component:
         self.entity = entity
         self.on_attached()
 
-    def _on_event(self, evt):
-        """TODO"""
-        pass
+    def _on_event(self, evt: EntityEvent) -> None:
+        self.on_event(evt)
+        try:
+            handler = getattr(self, f"on_{evt.name}")
+            return handler(evt)
+        except:
+            return None
 
     def _on_destroyed(self):
         self._is_destroyed = True

@@ -1,9 +1,10 @@
 from __future__ import annotations
+from typing import Any, Optional
 
 
 class EntityEvent:
 
-    def __init__(self, name: str, data=None):
+    def __init__(self, name: str, data: Optional[Any] = None):
         self.name = name
         if data is None:
             data = {}

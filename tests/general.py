@@ -16,6 +16,13 @@ class Velocity(Component):
         self.x = x
         self.y =y
 
+    def on_event(self, evt):
+        print(f"Event Name: {evt.name}")
+        print(f"Event Data: {evt.data}")
+
+    def on_try_move(self, evt):
+        print(f"Velocity.on_try_move() called in response to event {evt.name}!")
+
 
 def main():
     global last_update
@@ -44,7 +51,8 @@ def main():
             for entity in kinematics.result:
                 entity['POSITION'].x += entity['VELOCITY'].x * dt
                 entity['POSITION'].y += entity['VELOCITY'].y * dt
-                print(entity['POSITION'].x, entity['POSITION'].y)
+                delta = (entity['POSITION'].x, entity['POSITION'].y)
+                entity.fire_event('try_move', delta)
 
             last_update = now
 
