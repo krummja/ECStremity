@@ -2,7 +2,10 @@ from __future__ import annotations
 from typing import Optional, List, TYPE_CHECKING
 from uuid import uuid1
 
-from ecstremity.registries import ComponentRegistry, EntityRegistry, QueryRegistry
+from ecstremity.registries import (ComponentRegistry,
+                                   EntityRegistry,
+                                   PrefabRegistry,
+                                   QueryRegistry)
 
 if TYPE_CHECKING:
     from ecstremity import Component, Entity
@@ -14,6 +17,7 @@ class Engine:
     def __init__(self) -> None:
         self.components = ComponentRegistry(self)
         self.entities = EntityRegistry(self)
+        self.prefabs = PrefabRegistry(self)
         self.queries = QueryRegistry(self)
 
     def generate_uid(self) -> str:
@@ -55,14 +59,5 @@ class Engine:
         """Register a component class to the ComponentRegistry."""
         self.components.register(component)
 
-    def register_prefab(self, prefab):
-        """TODO"""
-        pass
-
-    def serialize(self, entities):
-        """TODO"""
-        pass
-
-    def deserialize(self, data):
-        """TODO"""
-        pass
+    def register_prefab(self, definition) -> None:
+        self.prefabs.register(definition)
