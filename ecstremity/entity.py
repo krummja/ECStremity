@@ -49,8 +49,6 @@ class Entity(defaultdict):
 
         A component instance can be supplied instead.
         """
-        if isinstance(component, str):
-            component = self.ecs.components[component]
         component = self.ecs.create_component(component, properties)
         return self._attach(component)
 

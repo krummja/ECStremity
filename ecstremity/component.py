@@ -6,7 +6,14 @@ if TYPE_CHECKING:
     from engine import Engine
 
 
-class Component:
+class componentmeta(type):
+    def __new__(cls, clsname, bases, clsdict):
+        clsobj = super().__new__(cls, clsname, bases, clsdict)
+        clsobj.name = str(clsname).upper()
+        return clsobj
+
+
+class Component(metaclass=componentmeta):
     """All Components inherit from this class.
 
     To create a new Component, inherit from this base class and define the
@@ -20,14 +27,6 @@ class Component:
     ecs: Engine
     entity: Optional[Entity] = None
     _is_destroyed: bool = False
-
-    @property
-    def name(self) -> str:
-        return self._name.upper()
-
-    @name.setter
-    def name(self, value: str) -> None:
-        self._name = value.upper()
 
     @property
     def is_destroyed(self) -> bool:

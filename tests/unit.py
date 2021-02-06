@@ -15,14 +15,12 @@ mock_function = create_autospec(function, return_value='Mock Callback!')
 
 
 class Position(Component):
-    name = "POSITION"
     def __init__(self, x: float = 0.0, y: float = 0.0) -> None:
         self.x = x
         self.y = y
 
 
 class Renderable(Component):
-    name = "RENDERABLE"
     def __init__(self, char: str, fg: str, bg: str) -> None:
         self.char = char
         self.fg = fg
@@ -44,10 +42,14 @@ class TestECS(unittest.TestCase):
     def testCreateAndRegisterComponents(self):
         self.ecs.register_component(Position)
         position = self.ecs.create_component('POSITION', {'x': 1.0, 'y': 10.0})
+        position2 = self.ecs.create_component('poSiTion', {'x': 1.0, 'y': 10.0})
 
         self.assertTrue(isinstance(position, Component))
         self.assertTrue(position.x == 1.0)
         self.assertTrue(position.y == 10.0)
+        self.assertTrue(isinstance(position2, Component))
+        self.assertTrue(position2.x == 1.0)
+        self.assertTrue(position2.y == 10.0)
 
     def testAttachComponent(self):
         self.ecs.register_component(Position)
@@ -87,8 +89,8 @@ class TestECS(unittest.TestCase):
         self.ecs.register_component(Renderable)
 
         monster = self.ecs.create_entity()
-        monster.add(Position, {'x': 0, 'y': 0})
-        monster.add(Renderable, {'char': '@', 'fg': '#0f0', 'bg': '#000'})
+        monster.add('Position', {'x': 0, 'y': 0})
+        monster.add('Renderable', {'char': '@', 'fg': '#0f0', 'bg': '#000'})
 
         empty_monster = self.ecs.create_entity()
 
@@ -114,8 +116,8 @@ class TestECS(unittest.TestCase):
         self.ecs.register_component(Renderable)
 
         monster = self.ecs.create_entity()
-        monster.add(Position, {'x': 0, 'y': 0})
-        monster.add(Renderable, {'char': '@', 'fg': '#0f0', 'bg': '#000'})
+        monster.add('Position', {'x': 0, 'y': 0})
+        monster.add('Renderable', {'char': '@', 'fg': '#0f0', 'bg': '#000'})
 
         empty_monster = self.ecs.create_entity()
 
@@ -134,8 +136,8 @@ class TestECS(unittest.TestCase):
         self.ecs.register_component(Renderable)
 
         monster = self.ecs.create_entity()
-        monster.add(Position, {'x': 0, 'y': 0})
-        monster.add(Renderable, {'char': '@', 'fg': '#0f0', 'bg': '#000'})
+        monster.add('Position', {'x': 0, 'y': 0})
+        monster.add('Renderable', {'char': '@', 'fg': '#0f0', 'bg': '#000'})
 
         empty_monster = self.ecs.create_entity()
 

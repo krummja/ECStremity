@@ -10,6 +10,9 @@ class Position(Component):
         self.x = x
         self.y = y
 
+class IsPlayer(Component):
+    """Is player flag."""
+
 class Velocity(Component):
     name = "VELOCITY"
     def __init__(self, x: int, y: int) -> None:
@@ -43,20 +46,35 @@ def main():
     def loop(last_update):
         while True:
 
-            kinematics = ecs.create_query(all_of=['Position', 'Velocity'])
+            # kinematics = ecs.create_query(all_of=['Position', 'Velocity'])
 
             now = time.time()
             dt = now - last_update
 
-            for entity in kinematics.result:
-                entity['POSITION'].x += entity['VELOCITY'].x * dt
-                entity['POSITION'].y += entity['VELOCITY'].y * dt
-                delta = (entity['POSITION'].x, entity['POSITION'].y)
-                entity.fire_event('try_move', delta)
+            # for entity in kinematics.result:
+            #     entity['POSITION'].x += entity['VELOCITY'].x * dt
+            #     entity['POSITION'].y += entity['VELOCITY'].y * dt
+            #     delta = (entity['POSITION'].x, entity['POSITION'].y)
+            #     entity.fire_event('try_move', delta)
 
             last_update = now
 
     start()
 
 if __name__ == '__main__':
-    main()
+    # main()
+
+    ecs = Engine()
+    ecs.register_component(Position)
+    ecs.register_component(IsPlayer)
+
+    monster = ecs.create_entity()
+    monster.add('position', {'x': 10, 'y': 0})
+    monster.add('isplayer', {})
+
+    print(monster.has('position'))
+    print(monster.has('isplayer'))
+
+    positional = ecs.create_query(all_of=['position'])
+    for e in positional.result:
+        print(e['position'].x)

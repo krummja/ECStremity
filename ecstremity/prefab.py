@@ -29,6 +29,6 @@ class Prefab:
 
             # Get the class symbol for that component.
             component_class = component.__class__
-            component_properties = properties[component_class.__name__]
+            component_properties = properties[component_class.name]
 
         return entity

@@ -22,13 +22,9 @@ class ComponentRegistry(Registry):
         of initialization parameters. If component is registered and properties
         is well-formed, returns a Component instance.
         """
-        if not isinstance(component, str):
-            if issubclass(component, Component):
-                component = component.name
+        if isinstance(component, str):
+            component = component.upper()
+        else:
+            component = component.name
         definition = self[component]
         return definition(**properties)
-
-    def __getitem__(self, component: Union[str, Component]) -> Component:
-        if not isinstance(component, str):
-            component = component.name
-        return super().__getitem__(component.upper())
