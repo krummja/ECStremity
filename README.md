@@ -23,19 +23,17 @@ from ecstremity import (Engine, Component)
 ecs = Engine()
 
 class Position(Component):
-    name: str = "POSITION"
     def __init__(self, x: int, y: int) -> None:
         self.x = x
         self.y = y
 
 class Velocity(Component):
-    name: str = "VELOCITY"
     def __init__(self, x: int, y: int) -> None:
         self.x = x
         self.y = y
 
 class Frozen(Component):
-    name: str = "FROZEN"
+    """Tag component denoting a frozen character."""
 ```
 
  All components must be registered with the engine. Component registration must use the class symbol (i.e. do not use the component name attribute).
@@ -47,7 +45,7 @@ ecs.register_component(Frozen)
 ```
 
 Instruct the engine to make a new entity, then add components to it.
-Once a component is registered, it can be accessed using the class symbol or the name attribute. The name attribute is not case-sensitive.
+Once a component is registered, it can be accessed using the class symbol or a string representing the class. The name attribute is not case-sensitive.
 
 ```python
 entity = ecs.create_entity()
@@ -60,8 +58,8 @@ The ecstremity library has no actual "system" class. Instead, instruct the engin
 
 ```python
 kinematics = ecs.create_query(
-    all_of = ['POSITION', 'VELOCITY'],
-    none_of = ['FROZEN']
+    all_of = ['Position', 'Velocity'],
+    none_of = ['Frozen']
     )
 ```
 
@@ -70,6 +68,6 @@ Loop over the result set to update the position for all entities in the query. T
 ```python
 def loop(dt):
     for entity in kinematics.result:
-        entity['POSITION'].x += entity['VELOCITY'].x * dt
-        entity['POSITION'].y += entity['VELOCITY'].y * dt
+        entity['Position'].x += entity['Velocity'].x * dt
+        entity['Position'].y += entity['Velocity'].y * dt
 ```

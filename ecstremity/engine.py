@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional, List, TYPE_CHECKING
+from typing import Any, Dict, Optional, List, TYPE_CHECKING, Union
 from uuid import uuid1
 
 from ecstremity.registries import (ComponentRegistry,
@@ -10,6 +10,7 @@ from ecstremity.registries import (ComponentRegistry,
 if TYPE_CHECKING:
     from ecstremity import Component, Entity
     from .query import Query
+    from .prefab import Prefab
 
 
 class Engine:
@@ -28,7 +29,11 @@ class Engine:
         """Use a `uid` to return an `Entity` from the `EntityRegistry`."""
         return self.entities.get(uid)
 
-    def create_component(self, component, properties) -> Component:
+    def create_component(
+            self,
+            component: Union[str, Component],
+            properties: Dict[str, Any]
+        ) -> Component:
         """Initialize a new component from those registered using the
         specified properties.
         """
@@ -41,8 +46,8 @@ class Engine:
         return self.entities.create(uid)
 
     def create_prefab(self, name_or_class, initial_props=None):
-        """TODO"""
-        pass
+        """Use the `PrefabRegistry` to initialize a set of new components
+        using the specified properties."""
 
     def create_query(
             self,
@@ -59,5 +64,5 @@ class Engine:
         """Register a component class to the ComponentRegistry."""
         self.components.register(component)
 
-    def register_prefab(self, definition) -> None:
-        self.prefabs.register(definition)
+    def register_prefab(self, prefab: Prefab) -> None:
+        self.prefabs.register(prefab)

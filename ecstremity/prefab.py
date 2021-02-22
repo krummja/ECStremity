@@ -22,13 +22,11 @@ class Prefab:
         for parent in cls.inherit:
             parent.apply_to_entity(entity, properties)
 
-        component_properties = {}
-
         # For each component defined for the Prefab...
         for component in cls.components:
-
             # Get the class symbol for that component.
             component_class = component.__class__
             component_properties = properties[component_class.name]
+            pass
 
         return entity
