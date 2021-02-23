@@ -79,7 +79,7 @@ class Entity(dict):
                 components = self[component]
             else:
                 components = self[component.name]
-            if components is not None:
+            if components is not None and not components.is_destroyed:
                 return True
         except KeyError:
             return False
