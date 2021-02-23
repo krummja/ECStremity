@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from ecstremity import Engine
 
 
-class Entity(defaultdict):
+class Entity(dict):
     """A big ol' bag of Components!
 
     The Entity class extends the `defaultdict` from the `collections` package.
@@ -79,7 +79,7 @@ class Entity(defaultdict):
                 components = self[component]
             else:
                 components = self[component.name]
-            if components:
+            if components is not None:
                 return True
         except KeyError:
             return False

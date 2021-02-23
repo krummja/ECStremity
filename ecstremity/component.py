@@ -93,8 +93,8 @@ class Component(metaclass=componentmeta):
             return None
 
     def _on_destroyed(self):
-        self._is_destroyed = True
         self.on_destroyed()
+        del self.entity[self.name.upper()]
 
     def _on_detached(self):
         if self.is_attached:

@@ -169,5 +169,19 @@ class TestECS(unittest.TestCase):
         query.candidate(entity)
         on_removed_callback1.assert_called_once_with(entity)
 
+    def test_add_remove(self):
+        self.ecs.register_component(Position)
+        entity = self.ecs.create_entity()
+
+        entity.add('Position', {'x': 10, 'y': 10})
+        self.assertTrue(entity.has('Position'))
+        entity['Position'].destroy()
+        self.assertFalse(entity.has('Position'))
+
+        entity.add('Position', {'x': 10, 'y': 10})
+        self.assertTrue(entity.has('Position'))
+        entity.remove('Position')
+        self.assertFalse(entity.has('Position'))
+
 if __name__ == '__main__':
     unittest.main()

@@ -105,3 +105,6 @@ class Query:
         for entity in self._ecs.entities.get_all:
             self.candidate(entity)
         return self._cache
+
+    def refresh(self):
+        self.blast_cache()

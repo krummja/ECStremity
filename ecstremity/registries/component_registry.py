@@ -10,6 +10,7 @@ class ComponentRegistry(Registry):
 
     def register(self, component: Component):
         self[component.name] = component
+        self[component.name].ecs = self.ecs
 
     def create(
             self,
