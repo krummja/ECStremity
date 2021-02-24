@@ -6,6 +6,10 @@ if TYPE_CHECKING:
     from engine import Engine
 
 
+class NonremovableError(Exception):
+    pass
+
+
 class componentmeta(type):
     def __new__(cls, clsname, bases, clsdict):
         clsobj = super().__new__(cls, clsname, bases, clsdict)
@@ -27,6 +31,7 @@ class Component(metaclass=componentmeta):
     ecs: Engine
     entity: Optional[Entity] = None
     _is_destroyed: bool = False
+    _removable: bool = True
 
     @property
     def is_destroyed(self) -> bool:
@@ -73,12 +78,16 @@ class Component(metaclass=componentmeta):
         """Remove this component. If `destroy = True` then this behaves the
         same as `destroy()`.
         """
-        if self.is_attached:
-            self.entity[self.name.upper()] = None
-            self.entity = None
-            return self
-        if destroy:
-            self._on_destroyed()
+        if self._removable:
+            if self.is_attached:
+                self.entity[self.name.upper()] = None
+                self.entity = None
+            if destroy:
+                self._on_destroyed()
+        else:
+            raise NonremovableError("This component cannot safely be removed!")
+
+        return self
 
     def _on_attached(self, entity: Entity):
         self.entity = entity
