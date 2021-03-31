@@ -38,3 +38,6 @@ class QueryRegistry(Registry):
     def on_entity_destroyed(self, entity: Entity) -> None:
         for query in self._queries:
             query._on_entity_destroyed(entity)
+
+    def hard_reset(self):
+        self._queries.clear()

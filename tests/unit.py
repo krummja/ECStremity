@@ -27,6 +27,18 @@ class Renderable(Component):
         self.bg = bg
 
 
+class System:
+    def __init__(self, ecs):
+        self.ecs = ecs
+        self._query = self.ecs.create_query(
+            all_of=['Position'],
+            none_of=['Renderable'])
+
+    def update(self):
+        for entity in self._query.result:
+            pass
+
+
 class TestECS(unittest.TestCase):
 
     def setUp(self):
@@ -182,6 +194,42 @@ class TestECS(unittest.TestCase):
         self.assertTrue(entity.has('Position'))
         entity.remove('Position')
         self.assertFalse(entity.has('Position'))
+
+    def test_query_caching(self):
+        self.ecs.queries.hard_reset()
+        self.ecs.register_component(Position)
+        self.ecs.register_component(Renderable)
+
+        system = System(self.ecs)
+        for i in range(10):
+            self.ecs.create_entity()
+
+        player = self.ecs.create_entity()
+
+        for entity in self.ecs.entities.get_all:
+            entity.add('Position', {'x': 0.0, 'y': 0.0})
+            # entity.add('Renderable', {'char': '@', 'fg': '#0f0', 'bg': '#000'})
+
+        player.add('Position', {'x': 1.0, 'y': 2.0})
+
+        loop = 0
+        while loop <= 100:
+            system.update()
+            loop += 1
+
+            if loop == 49:
+                self.assertTrue(len(system._query.result) == 11)
+            if loop == 50:
+                player.add('Renderable', {'char': '@', 'fg': '#0f0', 'bg': '#000'})
+            if loop == 51:
+                self.assertTrue(len(system._query.result) == 10)
+
+            if loop == 52:
+                # player.remove('Renderable')
+                player['Renderable'].remove()
+            if loop == 90:
+                self.assertTrue(len(system._query.result) == 11)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -34,7 +34,6 @@ class Query:
 
     def is_match(self, entity: Entity):
         """Returns True if the provided entity matches the query.
-
         Mostly used internally.
         """
         if len(self.query_filter['any_of']) >= 1:

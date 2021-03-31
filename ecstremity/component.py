@@ -81,6 +81,7 @@ class Component(metaclass=componentmeta):
         if self._removable:
             if self.is_attached:
                 self.entity[self.name.upper()] = None
+                self.ecs.components.on_component_removed(self.entity)
                 self.entity = None
             if destroy:
                 self._on_destroyed()

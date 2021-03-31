@@ -40,4 +40,4 @@ class PrefabRegistry(Registry):
                            component['properties'])
             return entity
         except KeyError:
-            pass
+            raise Exception(f"Failed to apply prefab {name} to entity with properties {properties}")

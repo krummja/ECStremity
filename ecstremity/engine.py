@@ -1,16 +1,19 @@
 from __future__ import annotations
-from typing import Any, Dict, Optional, List, TYPE_CHECKING, Union
+
+from typing import *
 from uuid import uuid1
 
-from ecstremity.registries import (ComponentRegistry,
-                                   EntityRegistry,
-                                   PrefabRegistry,
-                                   QueryRegistry)
+from ecstremity.registries import (ComponentRegistry, EntityRegistry,
+                                   PrefabRegistry, QueryRegistry)
 
 if TYPE_CHECKING:
     from ecstremity import Component, Entity
-    from .query import Query
+
     from .prefab import Prefab
+    from .query import Query
+
+
+GAME = TypeVar("GAME")
 
 
 class Engine:
@@ -66,3 +69,10 @@ class Engine:
 
     def register_prefab(self, prefab: Prefab) -> None:
         self.prefabs.register(prefab)
+
+
+class EngineAdapter(Engine):
+
+    def __init__(self, *, client: GAME) -> None:
+        self.client = client
+        super().__init__()

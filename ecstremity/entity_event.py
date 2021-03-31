@@ -1,14 +1,15 @@
 from __future__ import annotations
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 
 class EntityEvent:
 
-    def __init__(self, name: str, data: Optional[Any] = None):
+    def __init__(self, name: str, data: Optional[Dict[str, Any]] = None):
         self.name = name
         if data is None:
-            data = {}
-        self.data = data
+            self.data = {}
+        else:
+            self.data = data
 
         self._prevented: bool = False
         self._handled: bool = False

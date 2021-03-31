@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Any, Dict, Optional, TYPE_CHECKING, Union
 
+import copy
 from collections import  defaultdict
 
 from ecstremity import Component
@@ -60,7 +61,7 @@ class Entity(dict):
             component.destroy()
         self.ecs.entities.on_entity_destroyed(self)
 
-    def fire_event(self, name: str, data: Optional[Any] = None):
+    def fire_event(self, name: str, data: Optional[Dict[str, Any]] = None):
         evt = EntityEvent(name, data)
         for component in self.values():
             if isinstance(component, Component):
@@ -75,14 +76,9 @@ class Entity(dict):
     def has(self, component: Union[str, Component]):
         """Check if a component is currently attached to this Entity."""
         try:
-            if isinstance(component, str):
-                components = self[component]
-            else:
-                components = self[component.name]
-            if components is not None and not components.is_destroyed:
+            if self[component] and self[component] is not None:
                 return True
-            else:
-                return False
+            return False
         except KeyError:
             return False
 
@@ -96,12 +92,25 @@ class Entity(dict):
             return self[component].remove()
         return self[component].remove()
 
+    def clone(self) -> Entity:
+        """Make a copy of the entity with all components.
+
+        Creates a new UID to avoid clashes in the registry.
+        """
+        entity = self.ecs.create_entity()
+        cloned_entity = copy.copy(self)
+        cloned_entity.uid = entity.uid
+
+        self.ecs.entities.register(cloned_entity)
+        return cloned_entity.uid
+
     def serialize(self):
         """TODO"""
         pass
 
     def _attach(self, component: Component) -> bool:
         self[component.name] = component
+        self.ecs.queries.on_component_added(self)
         component._on_attached(self)
         return True
 

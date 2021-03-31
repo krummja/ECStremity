@@ -1,8 +1,11 @@
 from __future__ import annotations
-from typing import Any, Dict, TYPE_CHECKING, Optional, Union
+from typing import *
 
 from ecstremity import Component
 from .registry import Registry
+
+if TYPE_CHECKING:
+    from ecstremity import Entity
 
 
 class ComponentRegistry(Registry):
@@ -29,3 +32,6 @@ class ComponentRegistry(Registry):
             component = component.name
         definition = self[component]
         return definition(**properties)
+
+    def on_component_removed(self, entity: Entity):
+        self.ecs.queries.on_component_removed(entity)
