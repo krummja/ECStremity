@@ -40,6 +40,10 @@ class Entity(dict):
         return self._is_destroyed
 
     @property
+    def component_keys(self):
+        return self.keys()
+
+    @property
     def components(self):
         """Return an iterable of all component instances attached to entity."""
         return self.items()
@@ -67,9 +71,7 @@ class Entity(dict):
                 component._on_event(evt)
                 if evt.prevented:
                     return evt
-
             # TODO Logic for nested components.
-
         return evt
 
     def has(self, component: Union[str, Component]):
@@ -118,3 +120,6 @@ class Entity(dict):
             component = component.name
         return super().__getitem__(component.upper())
 
+    def __repr__(self):
+        component_list = ", ".join(self.component_keys)
+        return f"Entity [{self.uid}] with [{component_list}]"

@@ -3,7 +3,7 @@ from typing import *
 
 if TYPE_CHECKING:
     from entity import Entity, EntityEvent
-    from engine import Engine
+    from engine import Engine, GAME, EngineAdapter
 
 
 class NonremovableError(Exception):
@@ -29,12 +29,17 @@ class Component(metaclass=componentmeta):
     consistency.
     """
 
-    ecs: Engine
+    ecs: Union[Engine, EngineAdapter]
+    client: GAME
     init_props: Dict[str, Any]
     entity: Optional[Entity] = None
     _name: str = ''
     _is_destroyed: bool = False
     _removable: bool = True
+
+    @property
+    def name(self):
+        return self._name
 
     @property
     def is_destroyed(self) -> bool:

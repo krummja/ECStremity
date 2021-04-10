@@ -14,6 +14,8 @@ class ComponentRegistry(Registry):
     def register(self, component: Component):
         self[component.name] = component
         self[component.name].ecs = self.ecs
+        if 'client' in self.ecs.__dict__:
+            self[component.name].client = self.ecs.client
 
     def create(
             self,

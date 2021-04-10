@@ -12,6 +12,7 @@ class EventData:
     instigator: Entity = None
     target: Union[Tuple[int, int], Entity] = None
     interactions: List[Dict[str, str]] = None
+    callback: Callable[[Any], Any] = None
     cost: float = None
 
 
@@ -48,18 +49,12 @@ class EntityEvent:
         """Callback for `_prevented` attribute."""
         self._prevented = True
 
-    def route(self, target: Entity):
+    def route(self, new_event: str, target: Entity):
         self._routed = True
-        name = self.name
-        if self.name[:4] == 'fwd_':
-            name = self.name[4:]
-        else:
-            print(f"Expected event prefixed with `fwd_`, got {name} instead.")
-
         if not self.data.target:
             raise ValueError("Routed events require a target entity!")
         else:
-            return target.fire_event(name, self.data)
+            return target.fire_event(new_event, self.data)
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, EntityEvent):
