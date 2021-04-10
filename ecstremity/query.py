@@ -25,7 +25,7 @@ class Query:
         self._on_entity_added_cbs = []
         self._on_entity_removed_cbs = []
         self._cache = []
-        self.blast_cache()
+        self.clear_cache()
 
     @property
     def result(self):
@@ -98,12 +98,11 @@ class Query:
             for cb in self._on_entity_removed_cbs:
                 cb(entity)
 
-    def blast_cache(self):
-        """Press CTRL+H, check all the boxes and go! Set me free - blast my cache!"""
+    def clear_cache(self):
         self._cache.clear()
         for entity in self._ecs.entities.get_all:
             self.candidate(entity)
         return self._cache
 
     def refresh(self):
-        self.blast_cache()
+        self.clear_cache()

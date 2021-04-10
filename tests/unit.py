@@ -230,6 +230,27 @@ class TestECS(unittest.TestCase):
             if loop == 90:
                 self.assertTrue(len(system._query.result) == 11)
 
+    def test_create_prefab(self):
+        self.ecs.register_component(Position)
+        self.ecs.register_component(Renderable)
+        self.ecs.register_prefab({
+            'name': 'TestPrefab',
+            'inherit': None,
+            'components': [
+                {'type': 'Position',
+                 'properties': {'x': 10, 'y': 10}},
+                {'type': 'Renderable',
+                 'properties': {'char': '@', 'fg': 0xFFFFFFFF, 'bg': 0xFF151515}}
+                ]
+            })
+
+        self.assertTrue('TESTPREFAB' in self.ecs.prefabs)
+
+        entity = self.ecs.create_entity()
+        self.ecs.prefabs.apply_to_entity(entity, 'TestPrefab')
+        self.assertTrue(entity.has('Position'))
+        self.assertTrue(entity.has('Renderable'))
+
 
 if __name__ == '__main__':
     unittest.main()

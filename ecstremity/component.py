@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional, TYPE_CHECKING
+from typing import *
 
 if TYPE_CHECKING:
     from entity import Entity, EntityEvent
@@ -11,8 +11,9 @@ class NonremovableError(Exception):
 
 
 class componentmeta(type):
-    def __new__(cls, clsname, bases, clsdict):
-        clsobj = super().__new__(cls, clsname, bases, clsdict)
+
+    def __new__(mcs, clsname, bases, clsdict):
+        clsobj = super().__new__(mcs, clsname, bases, clsdict)
         clsobj.name = str(clsname).upper()
         return clsobj
 
@@ -29,7 +30,9 @@ class Component(metaclass=componentmeta):
     """
 
     ecs: Engine
+    init_props: Dict[str, Any]
     entity: Optional[Entity] = None
+    _name: str = ''
     _is_destroyed: bool = False
     _removable: bool = True
 
@@ -99,7 +102,7 @@ class Component(metaclass=componentmeta):
         try:
             handler = getattr(self, f"on_{evt.name}")
             return handler(evt)
-        except:
+        except Exception:
             return None
 
     def _on_destroyed(self):

@@ -24,7 +24,8 @@ class Engine:
         self.prefabs = PrefabRegistry(self)
         self.queries = QueryRegistry(self)
 
-    def generate_uid(self) -> str:
+    @staticmethod
+    def generate_uid() -> str:
         """Generate a new unique identifier for an `Entity`."""
         return uuid1().hex
 
@@ -51,6 +52,7 @@ class Engine:
     def create_prefab(self, name_or_class, initial_props=None):
         """Use the `PrefabRegistry` to initialize a set of new components
         using the specified properties."""
+        return self.prefabs.create(name_or_class)
 
     def create_query(
             self,
@@ -67,8 +69,8 @@ class Engine:
         """Register a component class to the ComponentRegistry."""
         self.components.register(component)
 
-    def register_prefab(self, prefab: Prefab) -> None:
-        self.prefabs.register(prefab)
+    def register_prefab(self, definition) -> None:
+        self.prefabs.register(definition)
 
 
 class EngineAdapter(Engine):

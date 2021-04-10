@@ -2,10 +2,9 @@ from __future__ import annotations
 from typing import Any, Dict, Optional, TYPE_CHECKING, Union
 
 import copy
-from collections import  defaultdict
 
 from ecstremity import Component
-from .entity_event import EntityEvent
+from .entity_event import EntityEvent, EventData
 
 if TYPE_CHECKING:
     from ecstremity import Engine
@@ -61,7 +60,7 @@ class Entity(dict):
             component.destroy()
         self.ecs.entities.on_entity_destroyed(self)
 
-    def fire_event(self, name: str, data: Optional[Dict[str, Any]] = None):
+    def fire_event(self, name: str, data: Optional[EventData] = None):
         evt = EntityEvent(name, data)
         for component in self.values():
             if isinstance(component, Component):
@@ -92,7 +91,7 @@ class Entity(dict):
             return self[component].remove()
         return self[component].remove()
 
-    def clone(self) -> Entity:
+    def clone(self) -> str:
         """Make a copy of the entity with all components.
 
         Creates a new UID to avoid clashes in the registry.

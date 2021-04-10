@@ -24,4 +24,4 @@ setup(
     packages=find_packages(include=['ecstremity', 'ecstremity.registries']),
     test_suite='tests',
     python_requires='>=3.8.5',
-)
+    )
