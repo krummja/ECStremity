@@ -25,7 +25,7 @@ class Query:
         self._on_entity_added_cbs = []
         self._on_entity_removed_cbs = []
         self._cache = []
-        self.blast_cache()
+        self.clear_cache()
 
     @property
     def result(self):
@@ -34,7 +34,6 @@ class Query:
 
     def is_match(self, entity: Entity):
         """Returns True if the provided entity matches the query.
-
         Mostly used internally.
         """
         if len(self.query_filter['any_of']) >= 1:
@@ -99,9 +98,11 @@ class Query:
             for cb in self._on_entity_removed_cbs:
                 cb(entity)
 
-    def blast_cache(self):
-        """Press CTRL+H, check all the boxes and go! Set me free - blast my cache!"""
+    def clear_cache(self):
         self._cache.clear()
         for entity in self._ecs.entities.get_all:
             self.candidate(entity)
         return self._cache
+
+    def refresh(self):
+        self.clear_cache()

@@ -15,18 +15,28 @@ mock_function = create_autospec(function, return_value='Mock Callback!')
 
 
 class Position(Component):
-    name = "POSITION"
     def __init__(self, x: float = 0.0, y: float = 0.0) -> None:
         self.x = x
         self.y = y
 
 
 class Renderable(Component):
-    name = "RENDERABLE"
     def __init__(self, char: str, fg: str, bg: str) -> None:
         self.char = char
         self.fg = fg
         self.bg = bg
+
+
+class System:
+    def __init__(self, ecs):
+        self.ecs = ecs
+        self._query = self.ecs.create_query(
+            all_of=['Position'],
+            none_of=['Renderable'])
+
+    def update(self):
+        for entity in self._query.result:
+            pass
 
 
 class TestECS(unittest.TestCase):
@@ -44,10 +54,14 @@ class TestECS(unittest.TestCase):
     def testCreateAndRegisterComponents(self):
         self.ecs.register_component(Position)
         position = self.ecs.create_component('POSITION', {'x': 1.0, 'y': 10.0})
+        position2 = self.ecs.create_component('poSiTion', {'x': 1.0, 'y': 10.0})
 
         self.assertTrue(isinstance(position, Component))
         self.assertTrue(position.x == 1.0)
         self.assertTrue(position.y == 10.0)
+        self.assertTrue(isinstance(position2, Component))
+        self.assertTrue(position2.x == 1.0)
+        self.assertTrue(position2.y == 10.0)
 
     def testAttachComponent(self):
         self.ecs.register_component(Position)
@@ -87,8 +101,8 @@ class TestECS(unittest.TestCase):
         self.ecs.register_component(Renderable)
 
         monster = self.ecs.create_entity()
-        monster.add(Position, {'x': 0, 'y': 0})
-        monster.add(Renderable, {'char': '@', 'fg': '#0f0', 'bg': '#000'})
+        monster.add('Position', {'x': 0, 'y': 0})
+        monster.add('Renderable', {'char': '@', 'fg': '#0f0', 'bg': '#000'})
 
         empty_monster = self.ecs.create_entity()
 
@@ -114,8 +128,8 @@ class TestECS(unittest.TestCase):
         self.ecs.register_component(Renderable)
 
         monster = self.ecs.create_entity()
-        monster.add(Position, {'x': 0, 'y': 0})
-        monster.add(Renderable, {'char': '@', 'fg': '#0f0', 'bg': '#000'})
+        monster.add('Position', {'x': 0, 'y': 0})
+        monster.add('Renderable', {'char': '@', 'fg': '#0f0', 'bg': '#000'})
 
         empty_monster = self.ecs.create_entity()
 
@@ -134,8 +148,8 @@ class TestECS(unittest.TestCase):
         self.ecs.register_component(Renderable)
 
         monster = self.ecs.create_entity()
-        monster.add(Position, {'x': 0, 'y': 0})
-        monster.add(Renderable, {'char': '@', 'fg': '#0f0', 'bg': '#000'})
+        monster.add('Position', {'x': 0, 'y': 0})
+        monster.add('Renderable', {'char': '@', 'fg': '#0f0', 'bg': '#000'})
 
         empty_monster = self.ecs.create_entity()
 
@@ -166,6 +180,77 @@ class TestECS(unittest.TestCase):
         entity.remove('Renderable')
         query.candidate(entity)
         on_removed_callback1.assert_called_once_with(entity)
+
+    def test_add_remove(self):
+        self.ecs.register_component(Position)
+        entity = self.ecs.create_entity()
+
+        entity.add('Position', {'x': 10, 'y': 10})
+        self.assertTrue(entity.has('Position'))
+        entity['Position'].destroy()
+        self.assertFalse(entity.has('Position'))
+
+        entity.add('Position', {'x': 10, 'y': 10})
+        self.assertTrue(entity.has('Position'))
+        entity.remove('Position')
+        self.assertFalse(entity.has('Position'))
+
+    def test_query_caching(self):
+        self.ecs.queries.hard_reset()
+        self.ecs.register_component(Position)
+        self.ecs.register_component(Renderable)
+
+        system = System(self.ecs)
+        for i in range(10):
+            self.ecs.create_entity()
+
+        player = self.ecs.create_entity()
+
+        for entity in self.ecs.entities.get_all:
+            entity.add('Position', {'x': 0.0, 'y': 0.0})
+            # entity.add('Renderable', {'char': '@', 'fg': '#0f0', 'bg': '#000'})
+
+        player.add('Position', {'x': 1.0, 'y': 2.0})
+
+        loop = 0
+        while loop <= 100:
+            system.update()
+            loop += 1
+
+            if loop == 49:
+                self.assertTrue(len(system._query.result) == 11)
+            if loop == 50:
+                player.add('Renderable', {'char': '@', 'fg': '#0f0', 'bg': '#000'})
+            if loop == 51:
+                self.assertTrue(len(system._query.result) == 10)
+
+            if loop == 52:
+                # player.remove('Renderable')
+                player['Renderable'].remove()
+            if loop == 90:
+                self.assertTrue(len(system._query.result) == 11)
+
+    def test_create_prefab(self):
+        self.ecs.register_component(Position)
+        self.ecs.register_component(Renderable)
+        self.ecs.register_prefab({
+            'name': 'TestPrefab',
+            'inherit': None,
+            'components': [
+                {'type': 'Position',
+                 'properties': {'x': 10, 'y': 10}},
+                {'type': 'Renderable',
+                 'properties': {'char': '@', 'fg': 0xFFFFFFFF, 'bg': 0xFF151515}}
+                ]
+            })
+
+        self.assertTrue('TESTPREFAB' in self.ecs.prefabs)
+
+        entity = self.ecs.create_entity()
+        self.ecs.prefabs.apply_to_entity(entity, 'TestPrefab')
+        self.assertTrue(entity.has('Position'))
+        self.assertTrue(entity.has('Renderable'))
+
 
 if __name__ == '__main__':
     unittest.main()

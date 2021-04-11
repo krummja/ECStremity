@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 import sys
 
-install_requires=['uuid']
+install_requires = ['uuid']
 if sys.version_info < (3, 5):
     install_requires.append('typing')
 
@@ -12,7 +12,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name='ecstremity',
-    version='1.0.0',
+    version='1.0.4',
     author='Jonathan Crum',
     author_email="crumja4@gmail.com",
     url="https://github.com/krummja/ECStremity",
@@ -24,4 +24,4 @@ setup(
     packages=find_packages(include=['ecstremity', 'ecstremity.registries']),
     test_suite='tests',
     python_requires='>=3.8.5',
-)
+    )

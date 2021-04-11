@@ -1,8 +1,11 @@
 from __future__ import annotations
-from typing import Any, Dict, TYPE_CHECKING, Optional, Union
+from typing import *
 
 from ecstremity import Component
 from .registry import Registry
+
+if TYPE_CHECKING:
+    from ecstremity import Entity
 
 
 class ComponentRegistry(Registry):
@@ -10,6 +13,9 @@ class ComponentRegistry(Registry):
 
     def register(self, component: Component):
         self[component.name] = component
+        self[component.name].ecs = self.ecs
+        if 'client' in self.ecs.__dict__:
+            self[component.name].client = self.ecs.client
 
     def create(
             self,
@@ -22,13 +28,12 @@ class ComponentRegistry(Registry):
         of initialization parameters. If component is registered and properties
         is well-formed, returns a Component instance.
         """
-        if not isinstance(component, str):
-            if issubclass(component, Component):
-                component = component.name
+        if isinstance(component, str):
+            component = component.upper()
+        else:
+            component = component.name
         definition = self[component]
         return definition(**properties)
 
-    def __getitem__(self, component: Union[str, Component]) -> Component:
-        if not isinstance(component, str):
-            component = component.name
-        return super().__getitem__(component.upper())
+    def on_component_removed(self, entity: Entity):
+        self.ecs.queries.on_component_removed(entity)

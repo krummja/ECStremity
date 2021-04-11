@@ -35,6 +35,7 @@ class EntityRegistry(Registry):
     def on_entity_destroyed(self, entity: Entity) -> None:
         """Callback for entity self-destruct."""
         print(f"Destroying {entity}")
+        self.ecs.queries.on_entity_destroyed(entity)
         del self[entity.uid]
 
     def register(self, entity: Entity) -> Entity:

@@ -1,12 +1,19 @@
 from __future__ import annotations
-from typing import Optional, List, TYPE_CHECKING
+
+from typing import *
 from uuid import uuid1
 
-from ecstremity.registries import ComponentRegistry, EntityRegistry, QueryRegistry
+from ecstremity.registries import (ComponentRegistry, EntityRegistry,
+                                   PrefabRegistry, QueryRegistry)
 
 if TYPE_CHECKING:
     from ecstremity import Component, Entity
+
+    from .prefab import Prefab
     from .query import Query
+
+
+GAME = TypeVar("GAME")
 
 
 class Engine:
@@ -14,9 +21,11 @@ class Engine:
     def __init__(self) -> None:
         self.components = ComponentRegistry(self)
         self.entities = EntityRegistry(self)
+        self.prefabs = PrefabRegistry(self)
         self.queries = QueryRegistry(self)
 
-    def generate_uid(self) -> str:
+    @staticmethod
+    def generate_uid() -> str:
         """Generate a new unique identifier for an `Entity`."""
         return uuid1().hex
 
@@ -24,7 +33,11 @@ class Engine:
         """Use a `uid` to return an `Entity` from the `EntityRegistry`."""
         return self.entities.get(uid)
 
-    def create_component(self, component, properties) -> Component:
+    def create_component(
+            self,
+            component: Union[str, Component],
+            properties: Dict[str, Any]
+        ) -> Component:
         """Initialize a new component from those registered using the
         specified properties.
         """
@@ -37,8 +50,9 @@ class Engine:
         return self.entities.create(uid)
 
     def create_prefab(self, name_or_class, initial_props=None):
-        """TODO"""
-        pass
+        """Use the `PrefabRegistry` to initialize a set of new components
+        using the specified properties."""
+        return self.prefabs.create(name_or_class)
 
     def create_query(
             self,
@@ -55,14 +69,12 @@ class Engine:
         """Register a component class to the ComponentRegistry."""
         self.components.register(component)
 
-    def register_prefab(self, prefab):
-        """TODO"""
-        pass
+    def register_prefab(self, definition) -> None:
+        self.prefabs.register(definition)
 
-    def serialize(self, entities):
-        """TODO"""
-        pass
 
-    def deserialize(self, data):
-        """TODO"""
-        pass
+class EngineAdapter(Engine):
+
+    def __init__(self, *, client: GAME) -> None:
+        self.client = client
+        super().__init__()

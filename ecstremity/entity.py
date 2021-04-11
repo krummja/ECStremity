@@ -1,15 +1,16 @@
 from __future__ import annotations
-from typing import Any, Dict, Optional, TYPE_CHECKING, Union, List
+from typing import Any, Dict, Optional, TYPE_CHECKING, Union
 
-from collections import  defaultdict
+import copy
 
 from ecstremity import Component
+from .entity_event import EntityEvent, EventData
 
 if TYPE_CHECKING:
     from ecstremity import Engine
 
 
-class Entity(defaultdict):
+class Entity(dict):
     """A big ol' bag of Components!
 
     The Entity class extends the `defaultdict` from the `collections` package.
@@ -39,6 +40,10 @@ class Entity(defaultdict):
         return self._is_destroyed
 
     @property
+    def component_keys(self):
+        return self.keys()
+
+    @property
     def components(self):
         """Return an iterable of all component instances attached to entity."""
         return self.items()
@@ -49,8 +54,6 @@ class Entity(defaultdict):
 
         A component instance can be supplied instead.
         """
-        if isinstance(component, str):
-            component = self.ecs.components[component]
         component = self.ecs.create_component(component, properties)
         return self._attach(component)
 
@@ -61,18 +64,22 @@ class Entity(defaultdict):
             component.destroy()
         self.ecs.entities.on_entity_destroyed(self)
 
-    def fire_event(self, name, data):
-        """TODO"""
+    def fire_event(self, name: str, data: Optional[EventData] = None):
+        evt = EntityEvent(name, data)
+        for component in self.values():
+            if isinstance(component, Component):
+                component._on_event(evt)
+                if evt.prevented:
+                    return evt
+            # TODO Logic for nested components.
+        return evt
 
     def has(self, component: Union[str, Component]):
         """Check if a component is currently attached to this Entity."""
         try:
-            if isinstance(component, str):
-                components = self[component]
-            else:
-                components = self[component.name]
-            if components:
+            if self[component] and self[component] is not None:
                 return True
+            return False
         except KeyError:
             return False
 
@@ -86,12 +93,25 @@ class Entity(defaultdict):
             return self[component].remove()
         return self[component].remove()
 
+    def clone(self) -> str:
+        """Make a copy of the entity with all components.
+
+        Creates a new UID to avoid clashes in the registry.
+        """
+        entity = self.ecs.create_entity()
+        cloned_entity = copy.copy(self)
+        cloned_entity.uid = entity.uid
+
+        self.ecs.entities.register(cloned_entity)
+        return cloned_entity.uid
+
     def serialize(self):
         """TODO"""
         pass
 
     def _attach(self, component: Component) -> bool:
         self[component.name] = component
+        self.ecs.queries.on_component_added(self)
         component._on_attached(self)
         return True
 
@@ -99,3 +119,7 @@ class Entity(defaultdict):
         if not isinstance(component, str):
             component = component.name
         return super().__getitem__(component.upper())
+
+    def __repr__(self):
+        component_list = ", ".join(self.component_keys)
+        return f"Entity [{self.uid}] with [{component_list}]"
