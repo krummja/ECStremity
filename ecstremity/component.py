@@ -102,7 +102,7 @@ class Component(metaclass=componentmeta):
         self.entity = entity
         self.on_attached()
 
-    def _on_event(self, evt: EntityEvent) -> None:
+    def _on_event(self, evt: EntityEvent) -> Any:
         self.on_event(evt)
         try:
             handler = getattr(self, f"on_{evt.name}")
