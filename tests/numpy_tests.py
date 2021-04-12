@@ -15,5 +15,14 @@ if __name__ == '__main__':
                                 allocation_scheme = ((1, 0, 1, 1, 0),
                                                      (1, 1, 1, 1, 1)))
 
+    allocation_scheme = (
+        (0, 1, 0),
+        (1, 0, 1),
+        (1, 0, 1),
+    )
+
+    test = verify_component_schema(allocation_scheme)
+    print(test)
+
     def add_tile_graphic(char, fg, bg, allocator=allocator):
         allocator.add({'ch': char, 'fg': fg, 'bg': bg})

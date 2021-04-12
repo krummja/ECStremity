@@ -13,10 +13,23 @@ def verify_component_schema(allocation_schema) -> bool:
         for i, val in enumerate(row):
             if val:
                 if not started[i]:
+                    print("--------------")
+                    print(started)
+                    print(ended)
+                    print("--------------")
                     started[i] = True
-                elif ended[i]:
-                    return False
+                else:
+                    if ended[i]:
+                        print("--------------")
+                        print(started)
+                        print(ended)
+                        print("--------------")
+                        return False
             elif started[i]:
+                print("--------------")
+                print(started)
+                print(ended)
+                print("--------------")
                 ended[i] = True
     return True
 
