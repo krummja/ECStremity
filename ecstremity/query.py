@@ -31,6 +31,8 @@ class Query:
     def result(self):
         """Return the result set of the query."""
         return self._cache
+        # lol so this won't work:
+        # return [entity for entity in filter((lambda e: e.uid in self._cache), self._ecs.entities.get_all)]
 
     def is_match(self, entity: Entity):
         """Returns True if the provided entity matches the query.
@@ -67,17 +69,17 @@ class Query:
         return False
 
     def candidate(self, entity: Entity):
-        is_tracking = self.has(entity)
+        is_tracking = self.has(entity.uid)
 
         if self.is_match(entity):
             if not is_tracking:
-                self._cache.append(entity)
+                self._cache.append(entity.uid)
                 for cb in self._on_entity_added_cbs:
                     cb(entity)
             return True
 
         if is_tracking:
-            self._cache.remove(entity)
+            self._cache.remove(entity.uid)
             for cb in self._on_entity_removed_cbs:
                 cb(entity)
 
