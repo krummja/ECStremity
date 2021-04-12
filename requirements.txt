@@ -1,0 +1,5 @@
+ecstremity~=1.0.3
+uuid~=1.30
+setuptools~=56.0.0
+numpy~=1.20.2
+cardinality
