@@ -1,9 +1,22 @@
 from __future__ import annotations
 from typing import *
+import numpy as np
+from itertools import zip_longest
 
-if TYPE_CHECKING:
-    from ecstremity.entity import Entity
-    from ecstremity.world import World
+
+def compose_dtype(fields, types):
+
+    if not isinstance(types, list):
+        types_list = []
+        for _ in range(len(fields)):
+            types_list.append(types)
+    else:
+        types_list = types
+
+    dtype = []
+    for f, t in zip(fields, types_list):
+        dtype.append((f, t))
+    return np.dtype(dtype)
 
 
 class ComponentMeta(type):
@@ -15,22 +28,25 @@ class ComponentMeta(type):
 
 
 class Component(metaclass=ComponentMeta):
-    world: World
-    init_props: Dict[str, Any]
-    entity: Entity
+    _fields = []
+    _types = []
+    ctype: np.dtype
 
-    def __str__(self) -> str:
-        return str(self.__init__.__dict__)
+    def __init__(self, *args):
+        for name, val in zip_longest(self._fields, args):
+            setattr(self, name, val)
+        self.ctype = compose_dtype(self._fields, self._types)
 
 
 class Position(Component):
+    _fields = ['x', 'y', 'z']
+    _types  = [int, int, int]
 
-    def __init__(self, x: int, y: int):
-        self.x = x
-        self.y = y
+    @property
+    def xy(self):
+        return self.x, self.y
 
 
-if __name__ == '__main__':
-    pos1 = Position(20, 2)
-    print(pos1.x)
-    print(pos1)
+class Renderable(Component):
+    _fields = ['ch', 'fg', 'bg']
+    _types  = [str, '3B', '3B']
