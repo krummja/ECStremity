@@ -23,7 +23,7 @@ class ComponentRegistry:
 
     @staticmethod
     def _compose_registry_dtype(component_list):
-        components_dt = []
+        components_dt = [("ctypes", str)]
         for component in component_list:
             components_dt.append((component.name, component.ctype))
         components_dt = np.dtype(components_dt)
