@@ -31,7 +31,6 @@ class Component(metaclass=componentmeta):
 
     ecs: Union[Engine, EngineAdapter]
     client: GAME
-    init_props: Dict[str, Any]
     entity: Optional[Entity] = None
     _name: str = ''
     _is_destroyed: bool = False

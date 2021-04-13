@@ -74,6 +74,7 @@ class Query:
                 self._cache.append(entity)
                 for cb in self._on_entity_added_cbs:
                     cb(entity)
+
             return True
 
         if is_tracking:
