@@ -6,11 +6,7 @@ if TYPE_CHECKING:
     from engine import Engine, GAME, EngineAdapter
 
 
-class NonremovableError(Exception):
-    pass
-
-
-class componentmeta(type):
+class ComponentMeta(type):
 
     def __new__(mcs, clsname, bases, clsdict):
         clsobj = super().__new__(mcs, clsname, bases, clsdict)
@@ -18,7 +14,7 @@ class componentmeta(type):
         return clsobj
 
 
-class Component(metaclass=componentmeta):
+class Component(metaclass=ComponentMeta):
     """All Components inherit from this class.
 
     To create a new Component, inherit from this base class and define the
@@ -49,9 +45,6 @@ class Component(metaclass=componentmeta):
     def is_attached(self) -> bool:
         """Returns True if this component is attached to an entity."""
         return bool(self.entity)
-
-    def clone(self) -> Component:
-        """TODO"""
 
     def destroy(self) -> None:
         """Remove and destroy this component."""

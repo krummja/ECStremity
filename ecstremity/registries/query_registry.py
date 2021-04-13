@@ -2,7 +2,6 @@ from __future__ import annotations
 from typing import Optional, List, TYPE_CHECKING
 
 from .registry import Registry
-
 from ecstremity.query import Query
 
 if TYPE_CHECKING:
