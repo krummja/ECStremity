@@ -7,8 +7,9 @@ from ecstremity.world import World
 
 class Engine:
 
-    def __init__(self):
-        self.components = ComponentRegistry()
+    def __init__(self, client=None):
+        self.client = client
+        self.components = ComponentRegistry(self)
 
     def register_component(self, component):
         self.components.register(component)

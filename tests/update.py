@@ -31,13 +31,9 @@ if __name__ == '__main__':
     world = engine.create_world()
 
     entity = world.create_entity()
+    for entity in world.entities:
+        print(entity.uid)
     entity.add(Position, {'x': 10, 'y': 10})
     entity.add(Renderable, {'char': '@', 'fg': 0xFFFF00FF, 'bg': 0xFF151515})
 
     system = world.create_query(all_of=[ Position, Renderable ])
-
-    i = 0
-    while i < 10:
-        for entity in system.result():
-            print(entity.uid)
-        i += 1

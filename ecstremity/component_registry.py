@@ -1,19 +1,23 @@
 from __future__ import annotations
 from typing import *
 from collections import OrderedDict
-
-if TYPE_CHECKING:
-    from ecstremity.component import Component
+from ecstremity.component import Component
 
 
 class ComponentRegistry:
-    _cbit: int = 0
-    _map = OrderedDict()
+
+    def __init__(self, engine):
+        self.engine = engine
+        self._cbit: int = 0
+        self._map = OrderedDict()
 
     def register(self, component: Component):
         component.cbit = self._cbit
+        component.client = self.engine.client
         self._cbit += 1
         self._map[component.name] = component
 
-    def get(self, key):
+    def __getitem__(self, key: Union[Component, str]):
+        if isinstance(key, Component):
+            key = key.name
         return self._map[key]

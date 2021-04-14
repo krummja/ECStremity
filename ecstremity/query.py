@@ -4,7 +4,12 @@ from ecstremity.bit_util import *
 from functools import reduce
 
 if TYPE_CHECKING:
+    from ecstremity.component import Component
     from ecstremity.world import World
+
+
+def from_name(world: World, component_name: str) -> Component:
+    return world.engine.components[component_name]
 
 
 class Query:
@@ -13,9 +18,9 @@ class Query:
     def __init__(
             self,
             world: World,
-            any_of: Optional[List[str]] = None,
-            all_of: Optional[List[str]] = None,
-            none_of: Optional[List[str]] = None
+            any_of: Optional[List[Union[Component, str]]] = None,
+            all_of: Optional[List[Union[Component, str]]] = None,
+            none_of: Optional[List[Union[Component, str]]] = None
     ) -> None:
         self._cache = []
         self.world = world
@@ -39,7 +44,7 @@ class Query:
         bits = entity.cbits
         any_of = self._any == 0 or bit_intersection(bits, self._any) > 0
         all_of = bit_intersection(bits, self._all) == self._all
-        none_of = bit_intersection(bits, self._none) == self._none
+        none_of = bit_intersection(bits, self._none) == 0
         return any_of & all_of & none_of
 
     def candidate(self, entity):
@@ -52,7 +57,7 @@ class Query:
             return True
 
         if is_tracking:
-            self._cache[idx] = 1
+            del self._cache[idx]
         return False
 
     def refresh(self):
@@ -60,5 +65,6 @@ class Query:
         for entity in self.world.entities:
             self.candidate(entity)
 
+    @property
     def result(self):
         return self._cache

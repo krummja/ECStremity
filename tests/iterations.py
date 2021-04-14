@@ -2,6 +2,7 @@ from ecstremity.engine import Engine
 from ecstremity.component import Component
 
 import math
+from collections import OrderedDict
 
 
 class Position(Component):
@@ -13,6 +14,7 @@ class Position(Component):
 
 
 class Obstacle(Component):
+    _allow_multiple = True
     name = "OBSTACLE"
 
 
@@ -33,32 +35,48 @@ def setup_ecs():
     engine.register_component(Foo)
     engine.register_component(Bar)
     engine.register_component(Baz)
-    return engine
+    world = engine.create_world()
+    return engine, world
 
 
-def add_remove_test(engine):
-    entity = engine.create_entity()
+def add_remove_test(world):
+    entity = world.create_entity()
     entity.add('POSITION', {'x': 0.0, 'y': 0.0})
     entity.remove('POSITION')
 
 
-def query_test(engine):
+def query_test(world):
+    world._queries = []
+    world._entities = OrderedDict()
     for _ in range(64*64):
-        entity = engine.create_entity()
+        entity = world.create_entity()
         entity.add('POSITION', {'x': 0.0, 'y': 0.0})
         entity.add('OBSTACLE', {})
 
-    engine.create_query(all_of=['POSITION'])
-    engine.create_query(all_of=['OBSTACLE'])
-    engine.create_query(all_of = ['OBSTACLE'])
-    engine.create_query(all_of = ['OBSTACLE'])
-    engine.create_query(all_of = ['OBSTACLE'])
-    engine.create_query(all_of = ['OBSTACLE'])
-    engine.create_query(all_of = ['OBSTACLE'])
-    engine.create_query(all_of = ['OBSTACLE'])
-    # for entity in query.result:
-    #     entity['POSITION'].x += 1.0
-    #     entity['POSITION'].y += 1.0
+    world.create_query(all_of=['POSITION'])
+    world.create_query(all_of=['OBSTACLE'])
+    world.create_query(all_of = ['OBSTACLE'])
+    world.create_query(all_of = ['OBSTACLE'])
+    world.create_query(all_of = ['OBSTACLE'])
+    world.create_query(all_of = ['OBSTACLE'])
+    world.create_query(all_of = ['OBSTACLE'])
+    world.create_query(all_of = ['OBSTACLE'])
+
+
+def add_test(world):
+    entity = world.create_entity()
+    entity.add(Position, {'x': 0, 'y': 0})
+    entity.add(Obstacle, {})
+    entity.add(Obstacle, {})
+    entity.add(Obstacle, {})
+    entity.add(Obstacle, {})
+    entity.add(Obstacle, {})
+    entity.add(Obstacle, {})
+    entity.add(Obstacle, {})
+    entity.add(Obstacle, {})
+    entity.add(Obstacle, {})
+    entity.add(Obstacle, {})
+    entity.add(Obstacle, {})
 
 
 if __name__ == '__main__':
@@ -66,17 +84,14 @@ if __name__ == '__main__':
 
     t = timeit.Timer(
         stmt="""
-query_test(engine)
-iterations += 1
-print("iteration:     " + str(iterations))
+query_test(world)
         """,
         setup="""
-from __main__ import setup_ecs, add_remove_test, query_test
-engine = setup_ecs()
-iterations = 0
+from __main__ import setup_ecs, add_remove_test, query_test, add_test
+engine, world = setup_ecs()
         """)
 
-    repeats = 1
+    repeats = 2
     result = t.timeit(number=repeats)
     print("total time:    " + str(math.trunc(result * 1000)) + "ms")
     print("per iteration: " + str(math.trunc((result / repeats) * 1000)) + "ms")

@@ -3,6 +3,7 @@ from typing import *
 
 if TYPE_CHECKING:
     from ecstremity.world import World
+    from ecstremity.entity import Entity
 
 
 class ComponentMeta(type):
@@ -17,6 +18,8 @@ class Component(metaclass=ComponentMeta):
     _allow_multiple: bool = False
     _world: World
     _cbit: int
+    _entity: Entity = None
+    _client = None
 
     @property
     def allow_multiple(self) -> bool:
@@ -24,11 +27,7 @@ class Component(metaclass=ComponentMeta):
 
     @property
     def world(self) -> World:
-        return self._world
-
-    @world.setter
-    def world(self, value: World) -> None:
-        self._world = value
+        return self._entity.world
 
     @property
     def cbit(self) -> int:
@@ -38,11 +37,32 @@ class Component(metaclass=ComponentMeta):
     def cbit(self, value) -> None:
         self._cbit = value
 
+    @property
+    def entity(self) -> Entity:
+        return self._entity
+
+    @entity.setter
+    def entity(self, value: Entity) -> None:
+        self._entity = value
+
+    @property
+    def client(self):
+        return self._client
+
+    @client.setter
+    def client(self, value):
+        self._client = value
+
     def destroy(self):
         pass
 
-    def _on_event(self):
-        pass
+    def _on_event(self, evt: EntityEvent) -> Any:
+        self.on_event(evt)
+        try:
+            handler = getattr(self, f"on_{evt.name}")
+            return handler(evt)
+        except Exception:
+            return None
 
     def _on_attached(self):
         pass

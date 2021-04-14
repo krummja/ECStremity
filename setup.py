@@ -12,7 +12,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name='ecstremity',
-    version='1.0.4',
+    version='1.1.0',
     author='Jonathan Crum',
     author_email="crumja4@gmail.com",
     url="https://github.com/krummja/ECStremity",
@@ -21,7 +21,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     install_requires=install_requires,
-    packages=find_packages(include=['ecstremity', 'ecstremity.registries']),
+    packages=find_packages(include=['ecstremity']),
     test_suite='tests',
     python_requires='>=3.8.5',
     )
