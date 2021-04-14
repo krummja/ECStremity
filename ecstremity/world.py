@@ -1,6 +1,10 @@
 from __future__ import annotations
 from typing import *
+from uuid import uuid1
 from collections import OrderedDict
+
+from ecstremity.entity import Entity
+from ecstremity.query import Query
 
 if TYPE_CHECKING:
     from ecstremity.engine import Engine
@@ -8,38 +12,47 @@ if TYPE_CHECKING:
 
 class World:
 
-    def __init__(self, engine: Engine):
+    def __init__(self, engine: Engine) -> None:
         self.engine = engine
         self._id = 0
         self._queries = []
-        self._entities = OrderedDict([])
+        self._entities = OrderedDict()
 
-    def create_uid(self):
-        pass
+    @property
+    def entities(self):
+        return self._entities.values()
+
+    @staticmethod
+    def create_uid():
+        return uuid1()
 
     def get_entity(self, uid):
-        return self._entities.get(uid)
+        return self._entities[uid]
 
     def get_entities(self):
         return self._entities.values()
 
-    def create_entity(self):
-        pass
+    def create_entity(self, uid=None):
+        if not uid:
+            uid = self.create_uid()
+        entity = Entity(self, uid)
+        self._entities[uid] = entity
+        return entity
 
-    def destroy_entity(self):
+    def destroy_entity(self, uid):
         pass
 
     def destroy_entities(self):
         pass
 
-    def create_query(self):
+    def destroy(self):
         pass
 
-    def create_prefab(self):
-        pass
+    def create_query(self, any_of=None, all_of=None, none_of=None):
+        query = Query(self, any_of, all_of, none_of)
+        self._queries.append(query)
+        return query
 
-    def _candidate(self, entity):
-        pass
-
-    def _destroyed(self, uid):
-        pass
+    def candidate(self, entity):
+        for query in self._queries:
+            query.candidate(entity)

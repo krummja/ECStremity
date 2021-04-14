@@ -1,40 +1,60 @@
 from __future__ import annotations
 from typing import *
-from inspect import Parameter, Signature, signature
-import numpy as np
 
-
-def make_signature(names):
-    params = []
-    for name in names:
-        param = Parameter(name, Parameter.POSITIONAL_OR_KEYWORD)
-        params.append(param)
-    return Signature(*params)
+if TYPE_CHECKING:
+    from ecstremity.world import World
 
 
 class ComponentMeta(type):
 
-    def __new__(mcs, clsname, bases, clsdict):
-        clsobj = super().__new__(mcs, clsname, bases, clsdict)
+    def __new__(mcs, clsname, bases, clsobj):
+        clsobj = super().__new__(mcs, clsname, bases, clsobj)
         clsobj.name = str(clsname).upper()
         return clsobj
 
 
 class Component(metaclass=ComponentMeta):
+    _allow_multiple: bool = False
+    _world: World
+    _cbit: int
 
-    __signature__ = make_signature([])
-    __properties__ = [(), {}]
+    @property
+    def allow_multiple(self) -> bool:
+        return self._allow_multiple
 
-    def __init__(self, *args, **kwargs) -> None:
-        bound = self.__signature__.bind(*args, **kwargs)
-        for name, value in bound.arguments.items():
-            setattr(self, name, val)
+    @property
+    def world(self) -> World:
+        return self._world
 
+    @world.setter
+    def world(self, value: World) -> None:
+        self._world = value
 
+    @property
+    def cbit(self) -> int:
+        return self._cbit
 
-class Position(Component):
-    pass
+    @cbit.setter
+    def cbit(self, value) -> None:
+        self._cbit = value
 
-if __name__ == '__main__':
-    position = Position(10, 10)
-    print(position.signature)
+    def destroy(self):
+        pass
+
+    def _on_event(self):
+        pass
+
+    def _on_attached(self):
+        pass
+
+    def _on_destroyed(self):
+        pass
+
+    def on_attached(self):
+        pass
+
+    def on_destroyed(self):
+        pass
+
+    def on_event(self, evt):
+        pass
