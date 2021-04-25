@@ -1,6 +1,6 @@
 # ECStremity
 
-**ECStremity** is an Entity-Component library. It is a Python port of the JavaScript library [geotic](https://github.com/ddmills/geotic) by Dalton Mills.
+**ECStremity** is an Entity-Component library. It is a Python port of the JavaScript library [geotic](https://github.com/ddmills/geotic) by [@ddmills](https://github.com/ddmills).
 
 - *entity* : a unique id and a collection of components
 - *component* : a data container
