@@ -155,3 +155,9 @@ class Container(Component):
 ```
 
 Which requires a corresponding `Container.on_try_close_container`, and so forth.
+
+### v.1.0.5
+- Radically improved performance by switching to bitmasking for component registration and querying.
+
+### v.1.0.6
+- Implemented a prefab system.

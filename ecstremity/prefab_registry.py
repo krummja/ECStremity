@@ -68,7 +68,10 @@ class Prefab:
                         pass
                 arr_comps[name] += 1
             else:
-                initial_comp_props = prefab_props[name]
+                try:
+                    initial_comp_props = prefab_props[name]
+                except KeyError:
+                    pass
             prefab_component.apply_to_entity(entity, initial_comp_props)
         return entity
 
