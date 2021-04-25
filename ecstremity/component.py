@@ -15,23 +15,19 @@ class ComponentMeta(type):
 
     def __new__(mcs, clsname, bases, clsobj):
         clsobj = super().__new__(mcs, clsname, bases, clsobj)
-        clsobj.name = str(clsname).upper()
+        clsobj.comp_id = str(clsname).upper()
         return clsobj
 
     def __getnewargs__(self):
-        return self.name
+        return self.comp_id
 
 
 class Component(metaclass=ComponentMeta):
-    _allow_multiple: bool = False
+    allow_multiple: bool = False
     _cbit: int = 0
     _client = None
     _entity: Entity = None
     _world: World
-
-    @property
-    def allow_multiple(self) -> bool:
-        return self._allow_multiple
 
     @property
     def cbit(self) -> int:

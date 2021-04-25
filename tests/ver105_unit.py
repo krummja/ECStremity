@@ -18,6 +18,12 @@ class Renderable(Component):
         self.bg = bg
 
 
+class Material(Component):
+    allow_multiple = True
+    def __init__(self, name: str):
+        self.name = name
+
+
 class MockSystem:
     def __init__(self, ecs):
         self.world = ecs.world
@@ -33,6 +39,7 @@ class BaseTest(unittest.TestCase):
         self.world = self.ecs.create_world()
         self.ecs.register_component(Position)
         self.ecs.register_component(Renderable)
+        self.ecs.register_component(Material)
 
     def testInitializations(self):
         self.assertTrue(self.ecs)
@@ -73,25 +80,57 @@ class BaseTest(unittest.TestCase):
 
     def testCreatePrefabs(self):
         self.ecs.prefabs.register({
-            'name': 'TestPrefab',
+            'name': 'Being',
             'components': [
                 {
                     'type': 'Position',
                     'properties': {
-                        'x': 10,
-                        'y': 10,
-                    },
+                        'x': 0, 'y': 0
+                    }
                 },
                 {
-                    'type': 'Renderable',
+                    'type': 'Material',
                     'properties': {
-                        'char': '@',
-                        'fg': 0xFFFF00FF,
-                        'bg': 0xFF151515,
+                        'name': 'flesh'
                     },
                 },
             ]
         })
+
+        self.ecs.prefabs.register({
+            'name': 'Warrior',
+            'components': [
+                {
+                    'type': 'Material',
+                    'properties': {
+                        'name': 'steel'
+                    }
+                }
+            ]
+        })
+
+        self.ecs.prefabs.register({
+            'name': 'HumanWarrior',
+            'inherit': ['Being', 'Warrior'],
+            'components': [
+                {
+                    'type': 'Material',
+                    'overwrite': True,
+                    'properties': {
+                        'name': 'silver'
+                    }
+                }
+            ]
+        })
+
+        warrior = self.world.create_prefab('HumanWarrior', {
+            'position': {
+                'x': 20, 'y': 50
+            }
+        })
+        self.assertTrue(warrior.has('Material'))
+        self.assertTrue(warrior['Material'].name == 'silver')
+        self.assertTrue(warrior['Position'].x == 20)
 
 
 if __name__ == '__main__':

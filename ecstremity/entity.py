@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 
 def attach_component(entity: Entity, component) -> None:
-    entity.components[component.name] = component
+    entity.components[component.comp_id] = component
 
 
 def remove_component(entity, component_name: str):
@@ -81,7 +81,7 @@ class Entity:
         if isinstance(component, str):
             remove_component(self, component)
         else:
-            remove_component(self, component.name)
+            remove_component(self, component.comp_id)
 
     def destroy(self):
         """Destroy this entity and all attached components."""
@@ -107,7 +107,7 @@ class Entity:
 
     def __getitem__(self, component: Union[Component, str]):
         if isinstance(component, Component):
-            component = component.name
+            component = component.comp_id
         return self.components[component.upper()]
 
     def __repr__(self):

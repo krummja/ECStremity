@@ -104,4 +104,4 @@ class World:
     def create_prefab(self, name: str, properties: Dict[str, Any] = None):
         if not properties:
             properties = {}
-        return self.engine
+        return self.engine.prefabs.create(self, name, properties)

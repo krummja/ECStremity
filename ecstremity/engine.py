@@ -19,9 +19,6 @@ class Engine:
     def register_component(self, component: Component):
         self.components.register(component)
 
-    def register_prefab(self, prefab):
-        self.prefabs.register(prefab.name, prefab)
-
     def create_world(self) -> World:
         return World(self)
 

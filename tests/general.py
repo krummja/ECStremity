@@ -24,7 +24,7 @@ class Velocity(Component):
         print(f"Event Data: {evt.data}")
 
     def on_try_move(self, evt):
-        print(f"Velocity.on_try_move() called in response to event {evt.name}!")
+        print(f"Velocity.on_try_move() called in response to event {evt.comp_id}!")
 
 
 def main():

@@ -15,9 +15,9 @@ class ComponentRegistry:
         component.cbit = self._cbit
         component.client = self.engine.client
         self._cbit += 1
-        self._map[component.name] = component
+        self._map[component.comp_id] = component
 
     def __getitem__(self, key: Union[Component, str]):
         if isinstance(key, Component):
-            key = key.name
+            key = key.comp_id
         return self._map[key.upper()]
