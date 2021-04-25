@@ -1,9 +1,14 @@
 from __future__ import annotations
 from typing import *
 
+import pickle
+import pickletools
+import lzma
+
 if TYPE_CHECKING:
     from ecstremity.world import World
     from ecstremity.entity import Entity
+    from ecstremity.entity_event import EntityEvent
 
 
 class ComponentMeta(type):
@@ -13,29 +18,36 @@ class ComponentMeta(type):
         clsobj.name = str(clsname).upper()
         return clsobj
 
+    def __getnewargs__(self):
+        return self.name
+
 
 class Component(metaclass=ComponentMeta):
     _allow_multiple: bool = False
-    _world: World
-    _cbit: int
-    _entity: Entity = None
+    _cbit: int = 0
     _client = None
+    _entity: Entity = None
+    _world: World
 
     @property
     def allow_multiple(self) -> bool:
         return self._allow_multiple
 
     @property
-    def world(self) -> World:
-        return self._entity.world
-
-    @property
     def cbit(self) -> int:
         return self._cbit
 
     @cbit.setter
-    def cbit(self, value) -> None:
+    def cbit(self, value: int) -> None:
         self._cbit = value
+
+    @property
+    def client(self):
+        return self._client
+
+    @client.setter
+    def client(self, value):
+        self._client = value
 
     @property
     def entity(self) -> Entity:
@@ -46,15 +58,28 @@ class Component(metaclass=ComponentMeta):
         self._entity = value
 
     @property
-    def client(self):
-        return self._client
+    def world(self) -> World:
+        return self._entity.world
 
-    @client.setter
-    def client(self, value):
-        self._client = value
+    def destroy(self) -> None:
+        self.entity.destroy()
 
-    def destroy(self):
+    def on_attached(self, entity: Entity) -> None:
         pass
+
+    def on_destroyed(self) -> None:
+        pass
+
+    def on_event(self, evt: EntityEvent) -> EntityEvent:
+        pass
+
+    def _on_attached(self, entity: Entity) -> None:
+        self.entity = entity
+        self.on_attached(entity)
+
+    def _on_destroyed(self) -> None:
+        self.on_destroyed()
+        self.entity = None
 
     def _on_event(self, evt: EntityEvent) -> Any:
         self.on_event(evt)
@@ -63,18 +88,3 @@ class Component(metaclass=ComponentMeta):
             return handler(evt)
         except Exception:
             return None
-
-    def _on_attached(self):
-        pass
-
-    def _on_destroyed(self):
-        pass
-
-    def on_attached(self):
-        pass
-
-    def on_destroyed(self):
-        pass
-
-    def on_event(self, evt):
-        pass

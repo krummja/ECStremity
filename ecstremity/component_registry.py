@@ -20,4 +20,4 @@ class ComponentRegistry:
     def __getitem__(self, key: Union[Component, str]):
         if isinstance(key, Component):
             key = key.name
-        return self._map[key]
+        return self._map[key.upper()]
