@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import *
+from types import SimpleNamespace
 from collections import OrderedDict
 import pickle
 import pickletools
@@ -7,12 +8,11 @@ import lzma
 import json
 
 from ecstremity.bit_util import *
-from ecstremity.entity_event import EntityEvent
+from ecstremity.entity_event import EntityEvent, EventData
 
 from ecstremity.component import Component
 
 if TYPE_CHECKING:
-    from ecstremity.entity_event import EventData
     from ecstremity.world import World
 
 
@@ -97,7 +97,12 @@ class Entity:
         self.components.clear()
         self.is_destroyed = True
 
-    def fire_event(self, name: str, data: Optional[EventData]) -> EntityEvent:
+    def fire_event(self, name: str, data: Optional[Union[Dict[str, Any], EventData]] = None) -> EntityEvent:
+        if isinstance(data, EventData):
+            data = data.get_record()
+        if not data:
+            data = {}
+
         evt = EntityEvent(name, data)
         for component in self.components.values():
             component._on_event(evt)

@@ -101,7 +101,7 @@ class World:
     def destroyed(self, uid: str):
         return self._entities.pop(uid)
 
-    def create_prefab(self, name: str, properties: Dict[str, Any] = None):
+    def create_prefab(self, name: str, properties: Dict[str, Any] = None, uid: str = None):
         if not properties:
             properties = {}
-        return self.engine.prefabs.create(self, name, properties)
+        return self.engine.prefabs.create(self, name, properties, uid)

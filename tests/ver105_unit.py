@@ -10,6 +10,14 @@ class Position(Component):
         self.x = x
         self.y = y
 
+    @property
+    def xy(self):
+        return self.x, self.y
+
+    def on_query_position(self, evt):
+        if evt.data.pos:
+            return evt.data
+
 
 class Renderable(Component):
     def __init__(self, char: str, fg: int, bg: int) -> None:
@@ -20,6 +28,7 @@ class Renderable(Component):
 
 class Material(Component):
     allow_multiple = True
+
     def __init__(self, name: str):
         self.name = name
 
@@ -77,6 +86,14 @@ class BaseTest(unittest.TestCase):
 
         self.world.destroy_entities()
         self.assertTrue(len(self.world.entities) == 0)
+
+    def testEntityEvents(self):
+        e1 = self.world.create_entity("E1")
+        e1.add(Position, {'x': 0, 'y': 0})
+
+        evt = e1.fire_event('query_position', {'pos': e1['Position'].xy})
+        self.assertTrue(evt.data.pos)
+        self.assertTrue(evt.data.pos == (0, 0))
 
     def testCreatePrefabs(self):
         self.ecs.prefabs.register({

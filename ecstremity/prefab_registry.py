@@ -58,20 +58,26 @@ class Prefab:
             comp_cls = prefab_component.cls
             name = comp_cls.comp_id
             initial_comp_props = {}
+
             if comp_cls.allow_multiple:
+
                 if not arr_comps.get(name):
                     arr_comps[name] = 0
+
                 if name in prefab_props.keys():
                     try:
                         initial_comp_props = prefab_props[name][arr_comps[name]]
                     except KeyError:
                         pass
+
                 arr_comps[name] += 1
+
             else:
                 try:
                     initial_comp_props = prefab_props[name]
                 except KeyError:
                     pass
+
             prefab_component.apply_to_entity(entity, initial_comp_props)
         return entity
 
@@ -111,11 +117,13 @@ class PrefabRegistry:
         comps = data.get('components', [])
 
         for component_data in comps:
+
             if isinstance(component_data, str):
                 name = component_data.upper()
                 cls = self.engine.components[name]
                 if cls:
                     prefab.add_component(PrefabComponent(cls))
+
             if isinstance(component_data, dict):
                 name = component_data['type']
                 cls = self.engine.components[name]
@@ -123,22 +131,27 @@ class PrefabRegistry:
                     prefab.add_component(PrefabComponent(
                         cls, component_data.get('properties', {}), component_data.get('overwrite', True)
                     ))
+
             else:
                 print(f"Unrecognized component reference {component_data} in prefab {data['name']}")
+
         return prefab
 
-    def create(self, world: World, name: str, properties: Dict[str, Any] = None):
+    def create(self, world: World, name: str, properties: Dict[str, Any] = None, uid: str = None) -> Optional[Entity]:
         if not properties:
             properties = {}
+
         prefab: Prefab = self.get(name)
         if not prefab:
             print(f"Could not instantiate {name} since it is not registered")
             return
-        entity = world.create_entity()
+
+        entity = world.create_entity(uid if uid else None)
         entity._qeligible = False
         prefab.apply_to_entity(entity, properties)
         entity._qeligible = True
         entity.candidacy()
+
         return entity
 
     def get(self, name):
