@@ -1,108 +1,70 @@
 from __future__ import annotations
-from typing import List, Optional, TYPE_CHECKING
+from typing import *
+from ecstremity.bit_util import *
+from functools import reduce
 
 if TYPE_CHECKING:
-    from ecstremity.engine import Engine
-    from ecstremity.entity import Entity
+    from ecstremity.component import Component
+    from ecstremity.world import World
+
+
+def from_name(world: World, component_name: str) -> Component:
+    return world.engine.components[component_name]
 
 
 class Query:
-    """Base Query class."""
+    _cache = []
 
     def __init__(
             self,
-            ecs: Engine,
-            any_of: Optional[List[str]] = None,
-            all_of: Optional[List[str]] = None,
-            none_of: Optional[List[str]] = None
-        ) -> None:
-        self._ecs = ecs
-        self.query_filter = {
-            'any_of': any_of if any_of is not None else [],
-            'all_of': all_of if all_of is not None else [],
-            'none_of': none_of if none_of is not None else []
-            }
-        self._on_entity_added_cbs = []
-        self._on_entity_removed_cbs = []
+            world: World,
+            any_of: Optional[List[Union[Component, str]]] = None,
+            all_of: Optional[List[Union[Component, str]]] = None,
+            none_of: Optional[List[Union[Component, str]]] = None
+    ) -> None:
         self._cache = []
-        self.clear_cache()
+        self.world = world
+        self.any_of = any_of if any_of is not None else []
+        self.all_of = all_of if all_of is not None else []
+        self.none_of = none_of if none_of is not None else []
 
-    @property
-    def result(self):
-        """Return the result set of the query."""
-        return self._cache
+        self._any = reduce(lambda a, b: add_bit(a, b.cbit), self.any_of, 0)
+        self._all = reduce(lambda a, b: add_bit(a, b.cbit), self.all_of, 0)
+        self._none = reduce(lambda a, b: add_bit(a, b.cbit), self.none_of, 0)
 
-    def is_match(self, entity: Entity):
-        """Returns True if the provided entity matches the query.
-        Mostly used internally.
-        """
-        if len(self.query_filter['any_of']) >= 1:
-            has_any = any([entity.has(c) for c in self.query_filter['any_of']])
-        else:
-            has_any = True
+        self.refresh()
 
-        has_all = all([entity.has(c) for c in self.query_filter['all_of']])
+    def idx(self, entity):
+        try:
+            return self._cache.index(entity)
+        except ValueError:
+            return -1
 
-        if len(self.query_filter['none_of']) >= 1:
-            has_none = all([not entity.has(c) for c in self.query_filter['none_of']])
-        else:
-            has_none = True
-        return has_any and has_all and has_none
+    def matches(self, entity):
+        bits = entity.cbits
+        any_of = self._any == 0 or bit_intersection(bits, self._any) > 0
+        all_of = bit_intersection(bits, self._all) == self._all
+        none_of = bit_intersection(bits, self._none) == 0
+        return any_of & all_of & none_of
 
-    def on_entity_added(self, cb):
-        """Add a callback for when an entity is created or updated to match
-        the query.
-        """
-        self._on_entity_added_cbs.append(cb)
+    def candidate(self, entity):
+        idx = self.idx(entity)
+        is_tracking = idx >= 0
 
-    def on_entity_removed(self, cb):
-        """Add a callback for when an entity is removed or updated to no
-        longer match the query.
-        """
-        self._on_entity_removed_cbs.append(cb)
-
-    def has(self, entity: Entity) -> bool:
-        if entity in self._cache:
-            return True
-        return False
-
-    def candidate(self, entity: Entity):
-        is_tracking = self.has(entity)
-
-        if self.is_match(entity):
+        if self.matches(entity):
             if not is_tracking:
                 self._cache.append(entity)
-                for cb in self._on_entity_added_cbs:
-                    cb(entity)
             return True
 
         if is_tracking:
-            self._cache.remove(entity)
-            for cb in self._on_entity_removed_cbs:
-                cb(entity)
-
+            del self._cache[idx]
         return False
 
-    def _on_entity_created(self, entity: Entity):
-        self.candidate(entity)
-
-    def _on_component_added(self, entity: Entity):
-        self.candidate(entity)
-
-    def _on_component_removed(self, entity: Entity):
-        self.candidate(entity)
-
-    def _on_entity_destroyed(self, entity: Entity):
-        if self.has(entity):
-            self._cache.remove(entity)
-            for cb in self._on_entity_removed_cbs:
-                cb(entity)
-
-    def clear_cache(self):
-        self._cache.clear()
-        for entity in self._ecs.entities.get_all:
-            self.candidate(entity)
-        return self._cache
-
     def refresh(self):
-        self.clear_cache()
+        self._cache = []
+        for entity in self.world.entities:
+            self.candidate(entity)
+
+    @property
+    def result(self):
+        return self._cache

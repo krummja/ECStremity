@@ -1,120 +1,104 @@
 from __future__ import annotations
 from typing import *
 
+import pickle
+import pickletools
+import lzma
+import traceback
+import sys
+from inspect import Signature, Parameter
+
 if TYPE_CHECKING:
-    from entity import Entity, EntityEvent
-    from engine import Engine, GAME, EngineAdapter
+    from ecstremity.world import World
+    from ecstremity.entity import Entity
+    from ecstremity.entity_event import EntityEvent
 
 
-class NonremovableError(Exception):
-    pass
+class ComponentMeta(type):
 
-
-class componentmeta(type):
-
-    def __new__(mcs, clsname, bases, clsdict):
-        clsobj = super().__new__(mcs, clsname, bases, clsdict)
-        clsobj.name = str(clsname).upper()
+    def __new__(mcs, clsname, bases, clsobj):
+        clsobj = super().__new__(mcs, clsname, bases, clsobj)
+        clsobj.comp_id = str(clsname).upper()
         return clsobj
 
 
-class Component(metaclass=componentmeta):
-    """All Components inherit from this class.
+class Component(metaclass=ComponentMeta):
+    allow_multiple: bool = False
+    _cbit: int = 0
+    _client = None
+    _entity: Entity = None
+    _world: World
 
-    To create a new Component, inherit from this base class and define the
-    Component's properties as instance variables in the subclass's constructor.
+    def __getstate__(self):
+        state = {k: v for k, v in self.__dict__.items() if k[0] != "_"}
+        return state
 
-    Note that the `name` attribute is the accessor for the component, whether
-    as an instance or uninitialized class. These should be in all-caps for
-    consistency.
-    """
+    def __setstate__(self, state):
+        self.__dict__ = state
 
-    ecs: Union[Engine, EngineAdapter]
-    client: GAME
-    init_props: Dict[str, Any]
-    entity: Optional[Entity] = None
-    _name: str = ''
-    _is_destroyed: bool = False
-    _removable: bool = True
+    def __eq__(self, other: Component) -> bool:
+        return self._cbit == other._cbit
 
-    @property
-    def name(self):
-        return self._name
+    def __str__(self):
+        return str(self.comp_id) + ": " + str(self.__getstate__())
 
     @property
-    def is_destroyed(self) -> bool:
-        """Returns True if this component has been destroyed."""
-        return self._is_destroyed
+    def cbit(self) -> int:
+        return self._cbit
+
+    @cbit.setter
+    def cbit(self, value: int) -> None:
+        self._cbit = value
 
     @property
-    def is_attached(self) -> bool:
-        """Returns True if this component is attached to an entity."""
-        return bool(self.entity)
+    def client(self):
+        return self._client
 
-    def clone(self) -> Component:
-        """TODO"""
+    @client.setter
+    def client(self, value):
+        self._client = value
+
+    @property
+    def entity(self) -> Entity:
+        return self._entity
+
+    @entity.setter
+    def entity(self, value: Entity) -> None:
+        self._entity = value
+
+    @property
+    def world(self) -> World:
+        return self._entity.world
 
     def destroy(self) -> None:
-        """Remove and destroy this component."""
-        self.remove(destroy=True)
+        self.entity.destroy()
 
-    def on_attached(self):
-        """Override this method to add behavior when this component is added
-        to an entity.
-        """
+    def on_attached(self, entity: Entity) -> None:
         pass
 
-    def on_event(self, evt):
-        """Override this method to add behavior when this component receives
-        a signal from an `EntityEvent`.
-        """
+    def on_destroyed(self) -> None:
         pass
 
-    def on_destroyed(self):
-        """Override this method to add behavior when this component is
-        destroyed.
-        """
+    def on_event(self, evt: EntityEvent) -> EntityEvent:
         pass
 
-    def on_detached(self):
-        """Override this method to add behavior when this component is removed
-        from an entity.
-        """
-        pass
-
-    def remove(self, destroy: bool = True) -> Optional[Component]:
-        """Remove this component. If `destroy = True` then this behaves the
-        same as `destroy()`.
-        """
-        if self._removable:
-            if self.is_attached:
-                self.entity[self.name.upper()] = None
-                self.ecs.components.on_component_removed(self.entity)
-                self.entity = None
-            if destroy:
-                self._on_destroyed()
-        else:
-            raise NonremovableError("This component cannot safely be removed!")
-
-        return self
-
-    def _on_attached(self, entity: Entity):
+    def _on_attached(self, entity: Entity) -> None:
         self.entity = entity
-        self.on_attached()
+        self.on_attached(entity)
+
+    def _on_destroyed(self) -> None:
+        self.on_destroyed()
+        self.entity = None
 
     def _on_event(self, evt: EntityEvent) -> Any:
         self.on_event(evt)
         try:
             handler = getattr(self, f"on_{evt.name}")
             return handler(evt)
-        except Exception:
+        except AttributeError:
             return None
+        except Exception:
+            traceback.print_exc(file=sys.stderr)
 
-    def _on_destroyed(self):
-        self._is_destroyed = True
-        self.on_destroyed()
-
-    def _on_detached(self):
-        if self.is_attached:
-            self.on_detached()
-            self.entity = None
+    def serialize(self):
+        return {self.comp_id: self.__getstate__()}
