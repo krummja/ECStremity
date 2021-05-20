@@ -2,6 +2,8 @@ from __future__ import annotations
 from typing import *
 from types import SimpleNamespace
 from collections import OrderedDict
+from dataclasses import dataclass
+
 import pickle
 import pickletools
 import lzma
@@ -27,6 +29,10 @@ def remove_component(entity, component_name: str):
     entity.candidacy()
 
 
+def serialize_component(component: Dict[str, Any]):
+    return component.serialize()
+
+
 class Entity:
 
     def __init__(self, world: World, uid: str):
@@ -36,6 +42,36 @@ class Entity:
         self.is_destroyed = False
         self._cbits = 0
         self._qeligible = True
+
+    def __getitem__(self, component: Union[Component, str]):
+        if isinstance(component, Component):
+            component = component.comp_id
+        return self.components[component.upper()]
+
+    def __getstate__(self):
+        return {
+            "uid": getattr(self, "uid"),
+            "components": getattr(self, "components")
+        }
+
+    def __setstate__(self, state):
+        for k, v in state.items():
+            setattr(self, k, v)
+
+    def __hash__(self):
+        return int(self.uid)
+
+    def __eq__(self, other: Entity) -> bool:
+        return (
+            self.uid == other.uid and
+            self.is_destroyed == other.is_destroyed and
+            self._qeligible == other._qeligible and
+            self.components == other.components
+        )
+
+    def __repr__(self):
+        component_list = ", ".join(self.components.keys())
+        return f"Entity [{self.uid}] with [{component_list}]"
 
     @property
     def cbits(self):
@@ -57,6 +93,8 @@ class Entity:
         """
         if isinstance(component, str):
             component = self.world.engine.components[component.upper()]
+        if "_entity" in properties.keys():
+            del properties["_entity"]
         component = component(**properties)
         attach_component(self, component)
 
@@ -97,6 +135,16 @@ class Entity:
         self.components.clear()
         self.is_destroyed = True
 
+    def serialize(self) -> Dict[str, Union[str, Dict[str, Any]]]:
+        components: Dict[str, Any] = {}
+        for comp_id in self.components.keys():
+            component_state = self.components[comp_id].__getstate__()
+            components[comp_id] = component_state
+        return {
+            "uid": self.uid,
+            "components": components
+        }
+
     def fire_event(self, name: str, data: Optional[Union[Dict[str, Any], EventData]] = None) -> EntityEvent:
         if isinstance(data, EventData):
             data = data.get_record()
@@ -109,12 +157,3 @@ class Entity:
             if evt.prevented:
                 return evt
         return evt
-
-    def __getitem__(self, component: Union[Component, str]):
-        if isinstance(component, Component):
-            component = component.comp_id
-        return self.components[component.upper()]
-
-    def __repr__(self):
-        component_list = ", ".join(self.components.keys())
-        return f"Entity [{self.uid}] with [{component_list}]"

@@ -1,10 +1,12 @@
 from __future__ import annotations
-
-import lzma
-import json
-import pickle
-import math
 from typing import *
+
+import json
+import lzma
+import pickle
+import pickletools
+import math
+
 from uuid import uuid1
 from collections import OrderedDict, deque
 
@@ -12,6 +14,7 @@ from ecstremity.entity import Entity
 from ecstremity.query import Query
 from ecstremity.component import Component
 
+from uuid import UUID
 if TYPE_CHECKING:
     from ecstremity.engine import Engine
 
@@ -99,9 +102,47 @@ class World:
             query.candidate(entity)
 
     def destroyed(self, uid: str):
-        return self._entities.pop(uid)
+        try:
+            self._entities.pop(uid)
+        except KeyError:
+            pass
 
     def create_prefab(self, name: str, properties: Dict[str, Any] = None, uid: str = None):
         if not properties:
             properties = {}
         return self.engine.prefabs.create(self, name, properties, uid)
+
+    def serialize(self, entities: OrderedDict[Entity] = None):
+        json = []
+        entities = entities if entities else self._entities
+        for entity in entities.values():
+            json.append(entity.serialize())
+        return {
+            "entities": json
+        }
+
+    def deserialize(self, data) -> None:
+        for entity_data in data["entities"]:
+            self._create_or_get_by_uid(entity_data["uid"])
+
+        for entity_data in data["entities"]:
+            self._deserialize_entity(entity_data)
+
+    def _create_or_get_by_uid(self, uid: str):
+        try:
+            return self.get_entity(uid)
+        except KeyError:
+            return self.create_entity(uid)
+
+    def _deserialize_entity(self, data):
+        uid: str = data["uid"]
+        components: Dict[str, bytes] = data["components"]
+
+        entity = self._create_or_get_by_uid(uid)
+        entity._qeligible = False
+
+        for comp_id, comp_props in components.items():
+            entity.add(comp_id, {k: v for k, v in comp_props.items()})
+
+        entity._qeligible = True
+        entity.candidacy()

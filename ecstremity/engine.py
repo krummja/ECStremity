@@ -6,7 +6,7 @@ from ecstremity.prefab_registry import PrefabRegistry
 from ecstremity.world import World
 
 if TYPE_CHECKING:
-    from ecstremity.component import Component
+    from ecstremity.component import Component, ComponentMeta
 
 
 class Engine:
@@ -16,7 +16,7 @@ class Engine:
         self.components = ComponentRegistry(self)
         self.prefabs = PrefabRegistry(self)
 
-    def register_component(self, component: Component):
+    def register_component(self, component: ComponentMeta):
         self.components.register(component)
 
     def create_world(self) -> World:
