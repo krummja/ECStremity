@@ -4,33 +4,33 @@ from ecstremity.prefab import Prefab
 from ecstremity.prefab_component import PrefabComponent
 
 if TYPE_CHECKING:
-    from .world import World
-    from .entity import Entity
-    from .engine import Engine
+    from ecstremity.world import World
+    from ecstremity.entity import Entity
+    from ecstremity.engine import Engine
 
 
 class PrefabRegistry:
 
     def __init__(self, engine: Engine):
         self.engine = engine
-        self._prefabs = {}
+        self._prefabs: Dict[str, Prefab] = {}
 
-    def register(self, data: Dict[str, Any]):
+    def register(self, data: Dict[str, Any]) -> None:
         prefab = self.deserialize(data)
         self._prefabs[prefab.name] = prefab
 
-    def deserialize(self, data):
+    def deserialize(self, data: Dict[str, Any]) -> Prefab:
         registered = self.get(data['name'])
         if registered:
             return registered
 
         prefab = Prefab(data['name'])
 
-        inherit = []
+        inherit: List[Optional[Prefab]] = []
         if isinstance(data.get('inherit'), list):
-            inherit = data['inherit']
+            inherit = data.get('inherit')
         elif isinstance(data.get('inherit'), str):
-            inherit = [data.get['inherit']]
+            inherit = [data.get('inherit')]
 
         prefab.inherit = [self.get(parent) for parent in inherit]
         comps = data.get('components', [])
@@ -57,14 +57,20 @@ class PrefabRegistry:
 
         return prefab
 
-    def create(self, world: World, name: str, properties: Dict[str, Any] = None, uid: str = None) -> Optional[Entity]:
+    def create(
+            self,
+            world: World,
+            name: str,
+            properties: Optional[Dict[str, Any]] = None,
+            uid: Optional[str] = None
+        ) -> Optional[Entity]:
         if not properties:
             properties = {}
 
-        prefab: Prefab = self.get(name)
+        prefab: Optional[Prefab] = self.get(name)
         if not prefab:
             print(f"Could not instantiate {name} since it is not registered")
-            return
+            return None
 
         entity = world.create_entity(uid if uid else None)
         entity._qeligible = False
@@ -77,5 +83,5 @@ class PrefabRegistry:
     def clear(self):
         self._prefabs.clear()
 
-    def get(self, name):
+    def get(self, name: str) -> Optional[Prefab]:
         return self._prefabs.get(name)

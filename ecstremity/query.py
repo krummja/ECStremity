@@ -4,6 +4,7 @@ from ecstremity.bit_util import *
 from functools import reduce
 
 if TYPE_CHECKING:
+    from ecstremity.entity import Entity
     from ecstremity.component import Component
     from ecstremity.world import World
 
@@ -12,15 +13,18 @@ def from_name(world: World, component_name: str) -> Component:
     return world.engine.components[component_name]
 
 
+QueryType = Optional[List[Component]]
+
+
 class Query:
-    _cache = []
+    _cache: List[Entity] = []
 
     def __init__(
             self,
             world: World,
-            any_of: Optional[List[Union[Component, str]]] = None,
-            all_of: Optional[List[Union[Component, str]]] = None,
-            none_of: Optional[List[Union[Component, str]]] = None
+            any_of: QueryType = None,
+            all_of: QueryType = None,
+            none_of: QueryType = None
     ) -> None:
         self._cache = []
         self.world = world
@@ -34,20 +38,20 @@ class Query:
 
         self.refresh()
 
-    def idx(self, entity):
+    def idx(self, entity: Entity) -> int:
         try:
             return self._cache.index(entity)
         except ValueError:
             return -1
 
-    def matches(self, entity):
+    def matches(self, entity: Entity) -> bool:
         bits = entity.cbits
         any_of = self._any == 0 or bit_intersection(bits, self._any) > 0
         all_of = bit_intersection(bits, self._all) == self._all
         none_of = bit_intersection(bits, self._none) == 0
         return any_of & all_of & none_of
 
-    def candidate(self, entity):
+    def candidate(self, entity: Entity) -> bool:
         idx = self.idx(entity)
         is_tracking = idx >= 0
 
@@ -60,11 +64,11 @@ class Query:
             del self._cache[idx]
         return False
 
-    def refresh(self):
+    def refresh(self) -> None:
         self._cache = []
         for entity in self.world.entities:
             self.candidate(entity)
 
     @property
-    def result(self):
+    def result(self) -> List[Entity]:
         return self._cache

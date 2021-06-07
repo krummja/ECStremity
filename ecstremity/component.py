@@ -16,31 +16,41 @@ if TYPE_CHECKING:
 
 class ComponentMeta(type):
 
-    def __new__(mcs, clsname, bases, clsobj):
+    def __new__(mcs, clsname: str, bases: Tuple[type, ...], clsobj: Any) -> Any:
         clsobj = super().__new__(mcs, clsname, bases, clsobj)
-        clsobj.comp_id = str(clsname).upper()
+        setattr(clsobj, "__component_id__", None)
+        clsobj.__component_id__ = str(clsname).upper()
         return clsobj
 
 
 class Component(metaclass=ComponentMeta):
+
     allow_multiple: bool = False
     _cbit: int = 0
-    _client = None
-    _entity: Entity = None
+    _client: Optional[Any] = None
+    _entity: Optional[Entity] = None
     _world: World
 
-    def __getstate__(self):
+    __component_id__: str
+
+    def __getstate__(self) -> Dict[str, Any]:
         state = {k: v for k, v in self.__dict__.items() if k[0] != "_"}
         return state
 
-    def __setstate__(self, state):
+    def __setstate__(self, state: Dict[str, Any]) -> None:
         self.__dict__ = state
 
-    def __eq__(self, other: Component) -> bool:
-        return self._cbit == other._cbit
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, Component):
+            return self._cbit == other._cbit
+        return False
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.comp_id) + ": " + str(self.__getstate__())
+
+    @property
+    def comp_id(self) -> str:
+        return self.__component_id__
 
     @property
     def cbit(self) -> int:
@@ -51,15 +61,15 @@ class Component(metaclass=ComponentMeta):
         self._cbit = value
 
     @property
-    def client(self):
+    def client(self) -> Optional[Any]:
         return self._client
 
     @client.setter
-    def client(self, value):
+    def client(self, value: Any) -> None:
         self._client = value
 
     @property
-    def entity(self) -> Entity:
+    def entity(self) -> Optional[Entity]:
         return self._entity
 
     @entity.setter
@@ -67,11 +77,14 @@ class Component(metaclass=ComponentMeta):
         self._entity = value
 
     @property
-    def world(self) -> World:
-        return self._entity.world
+    def world(self) -> Optional[World]:
+        if self._entity is not None:
+            return self._entity.world
+        return None
 
     def destroy(self) -> None:
-        self.entity.destroy()
+        if self.entity is not None:
+            self.entity.destroy()
 
     def on_attached(self, entity: Entity) -> None:
         pass
@@ -100,5 +113,5 @@ class Component(metaclass=ComponentMeta):
         except Exception:
             traceback.print_exc(file=sys.stderr)
 
-    def serialize(self):
+    def serialize(self) -> Dict[str, Any]:
         return {self.comp_id: self.__getstate__()}

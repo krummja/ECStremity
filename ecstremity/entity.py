@@ -18,70 +18,73 @@ if TYPE_CHECKING:
     from ecstremity.world import World
 
 
-def attach_component(entity: Entity, component) -> None:
+def attach_component(entity: Entity, component: Component) -> None:
     entity.components[component.comp_id] = component
 
 
-def remove_component(entity, component_name: str):
+def remove_component(entity: Entity, component_name: str) -> None:
     component = entity.components[component_name.upper()]
     del entity.components[component_name.upper()]
     entity.cbits = subtract_bit(entity.cbits, component.cbit)
     entity.candidacy()
 
 
-def serialize_component(component: Dict[str, Any]):
+def serialize_component(component: Component) -> Dict[str, Any]:
     return component.serialize()
 
 
 class Entity:
 
-    def __init__(self, world: World, uid: str):
+    def __init__(self, world: World, uid: str) -> None:
         self.world = world
         self.uid = uid
-        self.components = OrderedDict()
-        self.is_destroyed = False
-        self._cbits = 0
-        self._qeligible = True
+        self.components: OrderedDict[str, Component] = OrderedDict()
+        self.is_destroyed: bool = False
 
-    def __getitem__(self, component: Union[Component, str]):
+        self._cbits: int = 0
+        self._qeligible: bool = True
+
+    def __getitem__(self, component: Union[Component, str]) -> Component:
         if isinstance(component, Component):
             component = component.comp_id
         return self.components[component.upper()]
 
-    def __getstate__(self):
+    def __getstate__(self) -> Dict[str, Any]:
         return {
             "uid": getattr(self, "uid"),
             "components": getattr(self, "components")
         }
 
-    def __setstate__(self, state):
+    def __setstate__(self, state: Dict[str, Any]) -> None:
         for k, v in state.items():
             setattr(self, k, v)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return int(self.uid)
 
-    def __eq__(self, other: Entity) -> bool:
-        return (
-            self.uid == other.uid and
-            self.is_destroyed == other.is_destroyed and
-            self._qeligible == other._qeligible and
-            self.components == other.components
-        )
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, Entity):
+            return (
+                self.uid == other.uid and
+                self.is_destroyed == other.is_destroyed and
+                self._qeligible == other._qeligible and
+                self.components == other.components
+            )
+        return False
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         component_list = ", ".join(self.components.keys())
         return f"Entity [{self.uid}] with [{component_list}]"
 
     @property
-    def cbits(self):
+    def cbits(self) -> int:
         return self._cbits
 
     @cbits.setter
-    def cbits(self, value):
+    def cbits(self, value: int) -> None:
         self._cbits = value
 
-    def candidacy(self):
+    def candidacy(self) -> bool:
         """Check this entity against the existing queries in the active world."""
         if self._qeligible:
             self.world.candidate(self)
@@ -121,7 +124,7 @@ class Entity:
         else:
             remove_component(self, component.comp_id)
 
-    def destroy(self):
+    def destroy(self) -> None:
         """Destroy this entity and all attached components."""
         to_destroy = []
         for name, component in self.components.items():

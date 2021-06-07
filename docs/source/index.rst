@@ -10,8 +10,8 @@ ECStremity - A Python EC(S) Library
    :maxdepth: 2
    :caption: Contents:
 
-   component_registry
    component
+   component_registry
    engine
    entity
    query
