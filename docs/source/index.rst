@@ -10,39 +10,25 @@ ECStremity - A Python EC(S) Library
    :maxdepth: 2
    :caption: Contents:
 
+   intro
+
+   engine
+   world
+   entity
+   entity_event
+
    component
    component_registry
-   engine
-   entity
+
+   prefab
+   prefab_component
+   prefab_registry
+
    query
 
-Usage and Examples
-==================
-
-Engine
-------
-
-Entities
---------
-
-Components
-----------
-
-Queries
--------
-
-Serialization
--------------
-
-Events
-------
-
-Prefabs
--------
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
