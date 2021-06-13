@@ -7,17 +7,6 @@ if TYPE_CHECKING:
     from ecstremity.entity import Entity
 
 
-# @dataclass
-# class EventData:
-#     """Extensible base class to normalize EntityEvent interface."""
-#     instigator: Entity = None
-#     target: Union[Tuple[int, int], Entity, Iterable[Entity]] = None
-#     interactions: List[Dict[str, str]] = None
-#     goal: Component = None
-#     callback: Callable[[Any], Any] = None
-#     cost: float = None
-
-
 class EventData(SimpleNamespace):
 
     _record: List[str] = []
@@ -42,8 +31,33 @@ class EventData(SimpleNamespace):
 class EntityEvent:
 
     def __init__(self, name: str, data: Dict[str, Any] = None):
+        """An event to be broadcast to all of an Entity's components.
+
+        All events must be given a name so that they can be accessed inside
+        a Component's listener methods. For example, if an event is fired as
+        `Entity.fire_event("get_data")`, then some Component on that Entity
+        must have a corresponding method `on_get_data`.
+
+        Event data is optional, and is simply passed in as a dict. The event
+        data may be accessed inside of a listener by grabbing the `data`
+        attribute of the Event:
+
+            class SomeComponent(Component):
+                def some_behavior(self) -> None:
+                    self.entity.fire_event("get_data", {
+                        "foo": 10,
+                        "bar": False,
+                    })
+
+            class OtherComponent(Component):
+                def on_get_data(self, evt: EntityEvent) -> None:
+                    if evt.data.foo >= 5:
+                        # do something
+                    if evt.data.bar:
+                        # do another thing
+                    evt.handle()
+        """
         self.name = name
-        # self._data = SimpleNamespace(**data)
         self._data = EventData(**data)
 
         self._prevented: bool = False

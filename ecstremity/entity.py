@@ -84,7 +84,7 @@ class Entity:
     def cbits(self, value: int) -> None:
         self._cbits = value
 
-    def candidacy(self) -> bool:
+    def candidacy(self) -> None:
         """Check this entity against the existing queries in the active world."""
         if self._qeligible:
             self.world.candidate(self)
@@ -149,6 +149,7 @@ class Entity:
         }
 
     def fire_event(self, name: str, data: Optional[Union[Dict[str, Any], EventData]] = None) -> EntityEvent:
+        """Fire an event to all Components attached to this Entity."""
         if isinstance(data, EventData):
             data = data.get_record()
         if not data:

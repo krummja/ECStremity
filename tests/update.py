@@ -28,6 +28,8 @@ if __name__ == '__main__':
     engine.register_component(Position)
     engine.register_component(Renderable)
 
+    print(engine.components._map)
+
     world = engine.create_world()
 
     entity = world.create_entity()

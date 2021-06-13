@@ -26,7 +26,7 @@ class PrefabRegistry:
 
         prefab = Prefab(data['name'])
 
-        inherit: List[Optional[Prefab]] = []
+        inherit: List[str] = []
         if isinstance(data.get('inherit'), list):
             inherit = data.get('inherit')
         elif isinstance(data.get('inherit'), str):
@@ -34,6 +34,7 @@ class PrefabRegistry:
 
         prefab.inherit = [self.get(parent) for parent in inherit]
         comps = data.get('components', [])
+
         for component_data in comps:
             if isinstance(component_data, str):
                 comp_id = component_data
@@ -85,3 +86,8 @@ class PrefabRegistry:
 
     def get(self, name: str) -> Optional[Prefab]:
         return self._prefabs.get(name)
+
+
+class PrefabLoader:
+
+    pass

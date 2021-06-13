@@ -1,6 +1,10 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Union
+
+import os
+import importlib
 from collections import OrderedDict
+
 from ecstremity.component import Component, ComponentMeta
 
 if TYPE_CHECKING:
@@ -15,6 +19,7 @@ class ComponentRegistry:
         self._map: OrderedDict[str, Component] = OrderedDict()
 
     def register(self, component: Component) -> None:
+        """Register a Component for later construction."""
         component.cbit = self._cbit
         component.client = self.engine.client
         self._cbit += 1
@@ -25,3 +30,10 @@ class ComponentRegistry:
             return self._map[key.comp_id]
         else:
             return self._map[key.upper()]
+
+
+class ComponentLoader:
+
+    def __init__(self, path: str) -> None:
+        self.path = path
+        self.tree = os.listdir(f"{path}")

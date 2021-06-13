@@ -1,4 +1,8 @@
-from typing import TypeVar
+from .component import Component
+from .engine import Engine
+from .entity import Entity
+from .entity_event import EntityEvent
+from .world import World
 
 __all__ = [
     'Component',
@@ -7,9 +11,3 @@ __all__ = [
     'Engine',
     'World',
 ]
-
-from .component import Component
-from .engine import Engine
-from .entity import Entity
-from .entity_event import EntityEvent
-from .world import World

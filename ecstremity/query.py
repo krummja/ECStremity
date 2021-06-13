@@ -3,6 +3,8 @@ from typing import *
 from ecstremity.bit_util import *
 from functools import reduce
 
+from ecstremity.component import Component
+
 if TYPE_CHECKING:
     from ecstremity.entity import Entity
     from ecstremity.component import Component

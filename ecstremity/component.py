@@ -18,20 +18,47 @@ class ComponentMeta(type):
 
     def __new__(mcs, clsname: str, bases: Tuple[type, ...], clsobj: Any) -> Any:
         clsobj = super().__new__(mcs, clsname, bases, clsobj)
-        setattr(clsobj, "__component_id__", None)
-        clsobj.__component_id__ = str(clsname).upper()
+        setattr(clsobj, "comp_id", str(clsname).upper())
         return clsobj
 
 
 class Component(metaclass=ComponentMeta):
+    """Base Component class. Do not instance this class directly, but rather
+    inherit from it to make your own custom Components.
+
+    A new Component should always supply an __init__ method. Parameters to
+    __init__ must bound to the instance (i.e. parameter 'a' must have 'self.a'
+    inside __init__). These variables will be stored in the Component's
+    state to be utilized during serialization. Instance variables prefixed
+    with "_" are excluded, so prefix any instance variables not declared as
+    parameters to __init__ in this way.
+
+        class Position(Component):
+
+            def __init__(self, x: int, y: int) -> None:
+                self.x = x
+                self.y = y
+                self._pathing: bool = False
+
+            @property
+            def pathing(self) -> bool:
+                return self._pathing
+
+            @pathing.setter
+            def pathing(self, value: bool) -> None:
+                self._pathing = value
+
+    In the Position example, the parameters `x` and `y` will be used to
+    construct the Component from a prefab definition. Because the instance
+    variable `_pathing` is not a declared parameter, it is declared with a
+    prefixed '_', and is accessed via a getter/setter on the class instead.
+    """
 
     allow_multiple: bool = False
     _cbit: int = 0
     _client: Optional[Any] = None
     _entity: Optional[Entity] = None
     _world: World
-
-    __component_id__: str
 
     def __getstate__(self) -> Dict[str, Any]:
         state = {k: v for k, v in self.__dict__.items() if k[0] != "_"}
@@ -47,10 +74,6 @@ class Component(metaclass=ComponentMeta):
 
     def __str__(self) -> str:
         return str(self.comp_id) + ": " + str(self.__getstate__())
-
-    @property
-    def comp_id(self) -> str:
-        return self.__component_id__
 
     @property
     def cbit(self) -> int:
