@@ -26,7 +26,7 @@ class Prefab:
     def apply_to_entity(self, entity: Entity, prefab_props: Dict[int, Any] = None) -> Entity:
         if not prefab_props:
             prefab_props = {}
-        prefab_props = {k.upper(): v for k, v in prefab_props.items()}
+        prefab_props = {k.upper(): v for k, v in prefab_props.items() if k[0] != "_"}
 
         for parent in self.inherit:
             parent.apply_to_entity(entity, prefab_props)

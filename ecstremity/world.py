@@ -168,6 +168,6 @@ class World:
         entity = self._create_or_get_by_uid(uid)
         entity._qeligible = False
         for comp_id, comp_props in components.items():
-            entity.add(comp_id, {k: v for k, v in comp_props.items()})  # FIXME oh christ lol
+            entity.add(comp_id, {k: v for k, v in comp_props.items() if k[0] != "_"})
         entity._qeligible = True
         entity.candidacy()

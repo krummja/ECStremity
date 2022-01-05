@@ -66,6 +66,7 @@ if __name__ == '__main__':
     e3 = world.create_prefab("Derived")
 
     serial_world = world.serialize()
+    serial_world["entities"][1]["components"]["POSITION"]["_foo"] = "bar"
 
     ecs_2 = Engine()
     ecs_2.register_component(Position)
