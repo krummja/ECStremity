@@ -1,5 +1,4 @@
 
-
 def subtract_bit(num: int, bit: int) -> int:
     return num & ~(1 << bit)
 
